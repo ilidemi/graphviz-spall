@@ -39,31 +39,31 @@ struct adjmatrix_t {
 #define flatindex(v)	((size_t)ND_low(v))
 
 	/* forward declarations */
-static bool medians(graph_t * g, int r0, int r1);
-static int nodeposcmpf(node_t ** n0, node_t ** n1);
-static int edgeidcmpf(edge_t ** e0, edge_t ** e1);
-static void flat_breakcycles(graph_t * g);
-static void flat_reorder(graph_t * g);
-static void flat_search(graph_t * g, node_t * v);
-static void init_mincross(graph_t * g);
-static void merge2(graph_t * g);
-static void init_mccomp(graph_t *g, size_t c);
-static void cleanup2(graph_t * g, int nc);
-static int mincross_clust(graph_t * g, int);
-static int mincross(graph_t * g, int startpass, int endpass, int);
-static void mincross_step(graph_t * g, int pass);
-static void mincross_options(graph_t * g);
-static void save_best(graph_t * g);
-static void restore_best(graph_t * g);
-static adjmatrix_t *new_matrix(size_t i, size_t j);
-static void free_matrix(adjmatrix_t * p);
-static int ordercmpf(int *i0, int *i1);
+bool medians(graph_t * g, int r0, int r1);
+int nodeposcmpf(node_t ** n0, node_t ** n1);
+int edgeidcmpf(edge_t ** e0, edge_t ** e1);
+void flat_breakcycles(graph_t * g);
+void flat_reorder(graph_t * g);
+void flat_search(graph_t * g, node_t * v);
+void init_mincross(graph_t * g);
+void merge2(graph_t * g);
+void init_mccomp(graph_t *g, size_t c);
+void cleanup2(graph_t * g, int nc);
+int mincross_clust(graph_t * g, int);
+int mincross(graph_t * g, int startpass, int endpass, int);
+void mincross_step(graph_t * g, int pass);
+void mincross_options(graph_t * g);
+void save_best(graph_t * g);
+void restore_best(graph_t * g);
+adjmatrix_t *new_matrix(size_t i, size_t j);
+void free_matrix(adjmatrix_t * p);
+int ordercmpf(int *i0, int *i1);
 #ifdef DEBUG
 #if DEBUG > 1
-static int gd_minrank(Agraph_t *g) {return GD_minrank(g);}
-static int gd_maxrank(Agraph_t *g) {return GD_maxrank(g);}
-static rank_t *gd_rank(Agraph_t *g, int r) {return &GD_rank(g)[r];}
-static int nd_order(Agnode_t *v) { return ND_order(v); }
+int gd_minrank(Agraph_t *g) {return GD_minrank(g);}
+int gd_maxrank(Agraph_t *g) {return GD_maxrank(g);}
+rank_t *gd_rank(Agraph_t *g, int r) {return &GD_rank(g)[r];}
+int nd_order(Agnode_t *v) { return ND_order(v); }
 #endif
 void check_rs(graph_t * g, int null_ok);
 void check_order(void);
@@ -83,7 +83,7 @@ static int *TI_list;
 static bool ReMincross;
 
 #if defined(DEBUG) && DEBUG > 1
-static void indent(graph_t* g)
+void indent(graph_t* g)
 {
   if (g->parent) {
     fprintf (stderr, "  ");
@@ -91,7 +91,7 @@ static void indent(graph_t* g)
   }
 }
 
-static char* nname(node_t* v)
+char* nname(node_t* v)
 {
         static char buf[1000];
 	if (ND_node_type(v)) {
@@ -103,7 +103,7 @@ static char* nname(node_t* v)
 		snprintf(buf, sizeof(buf), "%s", agnameof(v));
 	return buf;
 }
-static void dumpg (graph_t* g)
+void dumpg (graph_t* g)
 {
     int j, i, r;
     node_t* v;
@@ -133,7 +133,7 @@ static void dumpg (graph_t* g)
     }
     fprintf (stderr, "}\n");
 }
-static void dumpr (graph_t* g, int edges)
+void dumpr (graph_t* g, int edges)
 {
     int j, i, r;
     node_t* v;
@@ -172,7 +172,7 @@ typedef struct {
 #define ND_np(n) (((info_t*)AGDATA(n))->np)
 #define ND_idx(n) (ND_order(ND_np(n)))
 
-static void
+void
 emptyComp (graph_t* sg)
 {
     Agnode_t* n;
@@ -186,7 +186,7 @@ emptyComp (graph_t* sg)
 
 #define isBackedge(e) (ND_idx(aghead(e)) > ND_idx(agtail(e)))
 
-static Agnode_t*
+Agnode_t*
 findSource (Agraph_t* g, Agraph_t* sg)
 {
     Agnode_t* n;
@@ -196,7 +196,7 @@ findSource (Agraph_t* g, Agraph_t* sg)
     return NULL;
 }
 
-static int
+int
 topsort (Agraph_t* g, Agraph_t* sg, Agnode_t** arr)
 {
     Agnode_t* n;
@@ -215,7 +215,7 @@ topsort (Agraph_t* g, Agraph_t* sg, Agnode_t** arr)
     return cnt;
 }
 
-static int
+int
 getComp (graph_t* g, node_t* n, graph_t* comp, int* indices)
 {
     int backedge = 0;
@@ -240,7 +240,7 @@ getComp (graph_t* g, node_t* n, graph_t* comp, int* indices)
 /* fixLabelOrder:
  * For each pair of nodes (labels), we add an edge 
  */
-static void
+void
 fixLabelOrder (graph_t* g, rank_t* rk)
 {
     int cnt;
@@ -394,7 +394,7 @@ void dot_mincross(graph_t * g, int doBalance)
     cleanup2(g, nc);
 }
 
-static adjmatrix_t *new_matrix(size_t i, size_t j) {
+adjmatrix_t *new_matrix(size_t i, size_t j) {
     adjmatrix_t *rv = gv_alloc(sizeof(adjmatrix_t));
     rv->nrows = i;
     rv->ncols = j;
@@ -402,7 +402,7 @@ static adjmatrix_t *new_matrix(size_t i, size_t j) {
     return rv;
 }
 
-static void free_matrix(adjmatrix_t * p)
+void free_matrix(adjmatrix_t * p)
 {
     if (p) {
 	free(p->data);
@@ -412,7 +412,7 @@ static void free_matrix(adjmatrix_t * p)
 
 #define ELT(M,i,j)		(M->data[((i)*M->ncols)+(j)])
 
-static void init_mccomp(graph_t *g, size_t c) {
+void init_mccomp(graph_t *g, size_t c) {
     int r;
 
     GD_nlist(g) = GD_comp(g).list[c];
@@ -424,14 +424,14 @@ static void init_mccomp(graph_t *g, size_t c) {
     }
 }
 
-static int betweenclust(edge_t * e)
+int betweenclust(edge_t * e)
 {
     while (ED_to_orig(e))
 	e = ED_to_orig(e);
     return (ND_clust(agtail(e)) != ND_clust(aghead(e)));
 }
 
-static void do_ordering_node(graph_t *g, node_t *n, bool outflag) {
+void do_ordering_node(graph_t *g, node_t *n, bool outflag) {
     int i, ne;
     node_t *u, *v;
     edge_t *e, *f, *fe;
@@ -471,7 +471,7 @@ static void do_ordering_node(graph_t *g, node_t *n, bool outflag) {
     }
 }
 
-static void do_ordering(graph_t *g, bool outflag) {
+void do_ordering(graph_t *g, bool outflag) {
     /* Order all nodes in graph */
     node_t *n;
 
@@ -480,7 +480,7 @@ static void do_ordering(graph_t *g, bool outflag) {
     }
 }
 
-static void do_ordering_for_nodes(graph_t * g)
+void do_ordering_for_nodes(graph_t * g)
 {
     /* Order nodes which have the "ordered" attribute */
     node_t *n;
@@ -505,7 +505,7 @@ static void do_ordering_for_nodes(graph_t * g)
  * Note that, in this implementation, the value of G_ordering
  * dominates the value of N_ordering.
  */
-static void ordered_edges(graph_t * g)
+void ordered_edges(graph_t * g)
 {
     char *ordering;
 
@@ -532,7 +532,7 @@ static void ordered_edges(graph_t * g)
     }
 }
 
-static int mincross_clust(graph_t * g, int doBalance)
+int mincross_clust(graph_t * g, int doBalance)
 {
     int c, nc;
 
@@ -549,7 +549,7 @@ static int mincross_clust(graph_t * g, int doBalance)
     return nc;
 }
 
-static bool left2right(graph_t *g, node_t *v, node_t *w) {
+bool left2right(graph_t *g, node_t *v, node_t *w) {
     adjmatrix_t *M;
 
     /* CLUSTER indicates orig nodes of clusters, and vnodes of skeletons */
@@ -577,7 +577,7 @@ static bool left2right(graph_t *g, node_t *v, node_t *w) {
     return ELT(M, flatindex(v), flatindex(w)) != 0;
 }
 
-static int in_cross(node_t * v, node_t * w)
+int in_cross(node_t * v, node_t * w)
 {
     edge_t **e1, **e2;
     int inv, cross = 0, t;
@@ -596,7 +596,7 @@ static int in_cross(node_t * v, node_t * w)
     return cross;
 }
 
-static int out_cross(node_t * v, node_t * w)
+int out_cross(node_t * v, node_t * w)
 {
     edge_t **e1, **e2;
     int inv, cross = 0, t;
@@ -615,7 +615,7 @@ static int out_cross(node_t * v, node_t * w)
 
 }
 
-static void exchange(node_t * v, node_t * w)
+void exchange(node_t * v, node_t * w)
 {
     int vi, wi, r;
 
@@ -628,7 +628,7 @@ static void exchange(node_t * v, node_t * w)
     GD_rank(Root)[r].v[vi] = w;
 }
 
-static void balanceNodes(graph_t * g, int r, node_t * v, node_t * w)
+void balanceNodes(graph_t * g, int r, node_t * v, node_t * w)
 {
     node_t *s;			/* separator node */
     int sepIndex = 0;
@@ -717,7 +717,7 @@ static void balanceNodes(graph_t * g, int r, node_t * v, node_t * w)
     }
 }
 
-static int balance(graph_t * g)
+int balance(graph_t * g)
 {
     int i, c0, c1, rv;
     node_t *v, *w;
@@ -753,7 +753,7 @@ static int balance(graph_t * g)
     return rv;
 }
 
-static int transpose_step(graph_t * g, int r, bool reverse)
+int transpose_step(graph_t * g, int r, bool reverse)
 {
     int i, c0, c1, rv;
     node_t *v, *w;
@@ -794,7 +794,7 @@ static int transpose_step(graph_t * g, int r, bool reverse)
     return rv;
 }
 
-static void transpose(graph_t * g, bool reverse)
+void transpose(graph_t * g, bool reverse)
 {
     int r, delta;
 
@@ -810,7 +810,7 @@ static void transpose(graph_t * g, bool reverse)
     } while (delta >= 1);
 }
 
-static int mincross(graph_t * g, int startpass, int endpass, int doBalance)
+int mincross(graph_t * g, int startpass, int endpass, int doBalance)
 {
     int maxthispass = 0, iter, trying, pass;
     int cur_cross, best_cross;
@@ -874,7 +874,7 @@ static int mincross(graph_t * g, int startpass, int endpass, int doBalance)
     return best_cross;
 }
 
-static void restore_best(graph_t * g)
+void restore_best(graph_t * g)
 {
     node_t *n;
     int i, r;
@@ -892,7 +892,7 @@ static void restore_best(graph_t * g)
     }
 }
 
-static void save_best(graph_t * g)
+void save_best(graph_t * g)
 {
     node_t *n;
     int i, r;
@@ -905,7 +905,7 @@ static void save_best(graph_t * g)
 }
 
 /* merges the connected components of g */
-static void merge_components(graph_t * g)
+void merge_components(graph_t * g)
 {
     node_t *u, *v;
 
@@ -929,7 +929,7 @@ static void merge_components(graph_t * g)
 }
 
 /* merge connected components, create globally consistent rank lists */
-static void merge2(graph_t * g)
+void merge2(graph_t * g)
 {
     int i, r;
     node_t *v;
@@ -956,7 +956,7 @@ static void merge2(graph_t * g)
     }
 }
 
-static void cleanup2(graph_t * g, int nc)
+void cleanup2(graph_t * g, int nc)
 {
     int i, j, r, c;
     node_t *v;
@@ -996,7 +996,7 @@ static void cleanup2(graph_t * g, int nc)
 		agnameof(g), nc, elapsed_sec());
 }
 
-static node_t *neighbor(node_t * v, int dir)
+node_t *neighbor(node_t * v, int dir)
 {
     node_t *rv;
 
@@ -1011,11 +1011,11 @@ assert((rv == 0) || (ND_order(rv)-ND_order(v))*dir > 0);
     return rv;
 }
 
-static bool is_a_normal_node_of(graph_t *g, node_t *v) {
+bool is_a_normal_node_of(graph_t *g, node_t *v) {
     return ND_node_type(v) == NORMAL && agcontains(g, v);
 }
 
-static bool is_a_vnode_of_an_edge_of(graph_t *g, node_t *v) {
+bool is_a_vnode_of_an_edge_of(graph_t *g, node_t *v) {
     if (ND_node_type(v) == VIRTUAL
 	&& ND_in(v).size == 1 && ND_out(v).size == 1) {
 	edge_t *e = ND_out(v).list[0];
@@ -1027,11 +1027,11 @@ static bool is_a_vnode_of_an_edge_of(graph_t *g, node_t *v) {
     return false;
 }
 
-static bool inside_cluster(graph_t *g, node_t *v) {
+bool inside_cluster(graph_t *g, node_t *v) {
     return is_a_normal_node_of(g, v) | is_a_vnode_of_an_edge_of(g, v);
 }
 
-static node_t *furthestnode(graph_t * g, node_t * v, int dir)
+node_t *furthestnode(graph_t * g, node_t * v, int dir)
 {
     node_t *u, *rv;
 
@@ -1103,7 +1103,7 @@ void rec_reset_vlists(graph_t * g)
  * are laid out one component at a time and these will necessarily have a
  * node on each rank from source to sink levels.
  */
-static Agraph_t*
+Agraph_t*
 realFillRanks (Agraph_t* g, int rnks[], int rnks_sz, Agraph_t* sg)
 {
     int i, c;
@@ -1142,7 +1142,7 @@ realFillRanks (Agraph_t* g, int rnks[], int rnks_sz, Agraph_t* sg)
     return sg;
 }
 
-static void
+void
 fillRanks (Agraph_t* g)
 {
     int rnks_sz = GD_maxrank(g) + 2;
@@ -1151,7 +1151,7 @@ fillRanks (Agraph_t* g)
     free (rnks);
 }
 
-static void init_mincross(graph_t * g)
+void init_mincross(graph_t * g)
 {
     int size;
 
@@ -1175,7 +1175,7 @@ static void init_mincross(graph_t * g)
     GlobalMaxRank = GD_maxrank(g);
 }
 
-static void flat_rev(Agraph_t * g, Agedge_t * e)
+void flat_rev(Agraph_t * g, Agedge_t * e)
 {
     int j;
     Agedge_t *rev;
@@ -1202,7 +1202,7 @@ static void flat_rev(Agraph_t * g, Agedge_t * e)
     }
 }
 
-static void flat_search(graph_t * g, node_t * v)
+void flat_search(graph_t * g, node_t * v)
 {
     int i;
     bool hascl;
@@ -1238,7 +1238,7 @@ static void flat_search(graph_t * g, node_t * v)
     ND_onstack(v) = false;
 }
 
-static void flat_breakcycles(graph_t * g)
+void flat_breakcycles(graph_t * g)
 {
     int i, r, flat;
     node_t *v;
@@ -1432,7 +1432,7 @@ void enqueue_neighbors(nodequeue * q, node_t * n0, int pass)
     }
 }
 
-static bool constraining_flat_edge(Agraph_t *g, Agedge_t *e) {
+bool constraining_flat_edge(Agraph_t *g, Agedge_t *e) {
   if (ED_weight(e) == 0)
     return false;
   if (!inside_cluster(g, agtail(e)))
@@ -1445,7 +1445,7 @@ static bool constraining_flat_edge(Agraph_t *g, Agedge_t *e) {
 /* construct nodes reachable from 'here' in post-order.
 * This is the same as doing a topological sort in reverse order.
 */
-static int postorder(graph_t * g, node_t * v, node_t ** list, int r)
+int postorder(graph_t * g, node_t * v, node_t ** list, int r)
 {
     edge_t *e;
     int i, cnt = 0;
@@ -1463,7 +1463,7 @@ static int postorder(graph_t * g, node_t * v, node_t ** list, int r)
     return cnt;
 }
 
-static void flat_reorder(graph_t * g)
+void flat_reorder(graph_t * g)
 {
     int i, r, pos, n_search, local_in_cnt, local_out_cnt, base_order;
     node_t *v, **left, **right, *t;
@@ -1545,7 +1545,7 @@ static void flat_reorder(graph_t * g)
     free(temprank);
 }
 
-static void reorder(graph_t * g, int r, bool reverse, bool hasfixed)
+void reorder(graph_t * g, int r, bool reverse, bool hasfixed)
 {
     int changed = 0, nelt;
     node_t **vlist = GD_rank(g)[r].v;
@@ -1597,7 +1597,7 @@ static void reorder(graph_t * g, int r, bool reverse, bool hasfixed)
     }
 }
 
-static void mincross_step(graph_t * g, int pass)
+void mincross_step(graph_t * g, int pass)
 {
     int r, other, first, last, dir;
 
@@ -1625,7 +1625,7 @@ static void mincross_step(graph_t * g, int pass)
     transpose(g, !reverse);
 }
 
-static int local_cross(elist l, int dir)
+int local_cross(elist l, int dir)
 {
     int i, j;
     int cross = 0;
@@ -1647,7 +1647,7 @@ static int local_cross(elist l, int dir)
     return cross;
 }
 
-static int rcross(graph_t * g, int r)
+int rcross(graph_t * g, int r)
 {
     int top, bot, cross, max, i, k;
     node_t **rtop, *v;
@@ -1705,7 +1705,7 @@ int ncross(graph_t * g)
     return count;
 }
 
-static int ordercmpf(int *i0, int *i1)
+int ordercmpf(int *i0, int *i1)
 {
   if (*i0 < *i1) {
     return -1;
@@ -1726,7 +1726,7 @@ static int ordercmpf(int *i0, int *i1)
  * a.mval is > 0.
  * Return true if n.mval is left -1, indicating a fixed node for sorting.
  */
-static bool flat_mval(node_t * n)
+bool flat_mval(node_t * n)
 {
     int i;
     edge_t *e, **fl;
@@ -1758,7 +1758,7 @@ static bool flat_mval(node_t * n)
 
 #define VAL(node,port) (MC_SCALE * ND_order(node) + (port).order)
 
-static bool medians(graph_t * g, int r0, int r1)
+bool medians(graph_t * g, int r0, int r1)
 {
     int i, j0, lspan, rspan, *list;
     node_t *n, **v;
@@ -1816,7 +1816,7 @@ static bool medians(graph_t * g, int r0, int r1)
     return hasfixed;
 }
 
-static int nodeposcmpf(node_t ** n0, node_t ** n1)
+int nodeposcmpf(node_t ** n0, node_t ** n1)
 {
   if (ND_order(*n0) < ND_order(*n1)) {
     return -1;
@@ -1827,7 +1827,7 @@ static int nodeposcmpf(node_t ** n0, node_t ** n1)
   return 0;
 }
 
-static int edgeidcmpf(edge_t ** e0, edge_t ** e1)
+int edgeidcmpf(edge_t ** e0, edge_t ** e1)
 {
   if (AGSEQ(*e0) < AGSEQ(*e1)) {
     return -1;
@@ -1855,7 +1855,7 @@ static int table[NTYPES][NTYPES] = {
     /* virtual */ {C_EE, C_VS, C_VV}
 };
 
-static int endpoint_class(node_t * n)
+int endpoint_class(node_t * n)
 {
     if (ND_node_type(n) == VIRTUAL)
 	return VIRTUALNODE;
@@ -1922,7 +1922,7 @@ void check_order(void)
 }
 #endif
 
-static void mincross_options(graph_t * g)
+void mincross_options(graph_t * g)
 {
     char *p;
     double f;

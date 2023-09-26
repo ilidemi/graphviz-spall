@@ -13,7 +13,7 @@
 #include <dotgen/dot.h>
 #include <stdbool.h>
 
-static node_t*
+node_t*
 map_interclust_node(node_t * n)
 {
     node_t *rv;
@@ -26,7 +26,7 @@ map_interclust_node(node_t * n)
 }
 
 /* make d slots starting at position pos (where 1 already exists) */
-static void 
+void 
 make_slots(graph_t * root, int r, int pos, int d)
 {
     int i;
@@ -53,7 +53,7 @@ make_slots(graph_t * root, int r, int pos, int d)
     GD_rank(root)[r].n += d - 1;
 }
 
-static node_t* 
+node_t* 
 clone_vn(graph_t * g, node_t * vn)
 {
     node_t *rv;
@@ -70,7 +70,7 @@ clone_vn(graph_t * g, node_t * vn)
     return rv;
 }
 
-static void 
+void 
 map_path(node_t * from, node_t * to, edge_t * orig, edge_t * ve, int type)
 {
     int r;
@@ -140,7 +140,7 @@ map_path(node_t * from, node_t * to, edge_t * orig, edge_t * ve, int type)
     }
 }
 
-static void make_interclust_chain(node_t * from, node_t * to, edge_t * orig) {
+void make_interclust_chain(node_t * from, node_t * to, edge_t * orig) {
     int newtype;
     node_t *u, *v;
 
@@ -157,7 +157,7 @@ static void make_interclust_chain(node_t * from, node_t * to, edge_t * orig) {
  * attach and install edges between clusters.
  * essentially, class2() for interclust edges.
  */
-static void interclexp(graph_t * subg)
+void interclexp(graph_t * subg)
 {
     graph_t *g;
     node_t *n;
@@ -223,7 +223,7 @@ I think that make_interclust_chain should create call other_edge(e) anyway
     }
 }
 
-static void 
+void 
 merge_ranks(graph_t * subg)
 {
     int i, d, r, pos, ipos;
@@ -257,7 +257,7 @@ merge_ranks(graph_t * subg)
     GD_expanded(subg) = true;
 }
 
-static void 
+void 
 remove_rankleaders(graph_t * g)
 {
     int r;
@@ -399,7 +399,7 @@ void install_cluster(graph_t * g, node_t * n, int pass, nodequeue * q)
     }
 }
 
-static void mark_lowcluster_basic(Agraph_t * g);
+void mark_lowcluster_basic(Agraph_t * g);
 void mark_lowclusters(Agraph_t * root)
 {
     Agnode_t *n, *vn;
@@ -422,7 +422,7 @@ void mark_lowclusters(Agraph_t * root)
     mark_lowcluster_basic(root);
 }
 
-static void mark_lowcluster_basic(Agraph_t * g)
+void mark_lowcluster_basic(Agraph_t * g)
 {
     Agraph_t *clust;
     Agnode_t *n, *vn;

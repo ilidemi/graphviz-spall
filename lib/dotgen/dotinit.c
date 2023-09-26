@@ -19,7 +19,7 @@
 #include <stddef.h>
 #include <stdint.h>
 
-static void
+void
 dot_init_subg(graph_t * g, graph_t* droot)
 {
     graph_t* subg;
@@ -35,7 +35,7 @@ dot_init_subg(graph_t * g, graph_t* droot)
 }
 
 
-static void 
+void 
 dot_init_node(node_t * n)
 {
     agbindrec(n, "Agnodeinfo_t", sizeof(Agnodeinfo_t), true);	//graph custom data
@@ -49,7 +49,7 @@ dot_init_node(node_t * n)
     ND_UF_size(n) = 1;
 }
 
-static void 
+void 
 dot_init_edge(edge_t * e)
 {
     char *tailgroup, *headgroup;
@@ -87,7 +87,7 @@ dot_init_node_edge(graph_t * g)
     }
 }
 
-static void 
+void 
 dot_cleanup_node(node_t * n)
 {
     free_list(ND_in(n));
@@ -102,7 +102,7 @@ dot_cleanup_node(node_t * n)
     agdelrec(n, "Agnodeinfo_t");	
 }
 
-static void free_virtual_edge_list(node_t * n)
+void free_virtual_edge_list(node_t * n)
 {
     edge_t *e;
 
@@ -120,7 +120,7 @@ static void free_virtual_edge_list(node_t * n)
     }
 }
 
-static void free_virtual_node_list(node_t * vn)
+void free_virtual_node_list(node_t * vn)
 {
     node_t *next_vn;
 
@@ -137,7 +137,7 @@ static void free_virtual_node_list(node_t * vn)
     }
 }
 
-static void 
+void 
 dot_cleanup_graph(graph_t * g)
 {
     int i;
@@ -190,7 +190,7 @@ fastn (graph_t * g)
 }
 
 #if DEBUG > 1
-static void
+void
 dumpRanks (graph_t * g)
 {
     int i, j;
@@ -216,7 +216,7 @@ dumpRanks (graph_t * g)
 #endif
 
 
-static void
+void
 remove_from_rank (Agraph_t * g, Agnode_t* n)
 {
     Agnode_t* v = NULL;
@@ -240,7 +240,7 @@ remove_from_rank (Agraph_t * g, Agnode_t* n)
  * It appears to be sufficient to remove them only from the
  * rank array and fast node list of the root graph.
  */
-static void
+void
 removeFill (Agraph_t * g)
 {
     Agnode_t* n;
@@ -261,7 +261,7 @@ removeFill (Agraph_t * g)
 
 #define agnodeattr(g,n,v) agattr(g,AGNODE,n,v)
 
-static void
+void
 attach_phase_attrs (Agraph_t * g, int maxphase)
 {
     Agsym_t* rk = agnodeattr(g,"rank","");
@@ -282,7 +282,7 @@ attach_phase_attrs (Agraph_t * g, int maxphase)
     agxbfree(&buf);
 }
 
-static void dotLayout(Agraph_t * g)
+void dotLayout(Agraph_t * g)
 {
     aspect_t aspect;
     aspect_t* asp;
@@ -325,7 +325,7 @@ static void dotLayout(Agraph_t * g)
 	dot_compoundEdges(g);
 }
 
-static void
+void
 initSubg (Agraph_t* sg, Agraph_t* g)
 {
     agbindrec(sg, "Agraphinfo_t", sizeof(Agraphinfo_t), true);
@@ -344,7 +344,7 @@ initSubg (Agraph_t* sg, Agraph_t* g)
  * the packing library assumes all units are in inches stored in ND_pos, so we
  * have to copy the position info there.
  */
-static void
+void
 attachPos (Agraph_t* g)
 {
     node_t* np;
@@ -362,7 +362,7 @@ attachPos (Agraph_t* g)
  * Store new position info from pack library call, stored in ND_pos in inches,
  * back to ND_coord in points.
  */
-static void
+void
 resetCoord (Agraph_t* g)
 {
     node_t* np = agfstnode(g);
@@ -378,7 +378,7 @@ resetCoord (Agraph_t* g)
     free (sp);
 }
 
-static void
+void
 copyCluster (Agraph_t* scl, Agraph_t* cl)
 {
     int nclust, j;
@@ -404,7 +404,7 @@ copyCluster (Agraph_t* scl, Agraph_t* cl)
  * Copy cluster tree and info from components to main graph.
  * Note that the original clusters have no Agraphinfo_t at this time.
  */
-static void
+void
 copyClusterInfo (int ncc, Agraph_t** ccs, Agraph_t* root)
 {
     int j, i, nclust = 0;
@@ -430,7 +430,7 @@ copyClusterInfo (int ncc, Agraph_t** ccs, Agraph_t* root)
 /* doDot:
  * Assume g has nodes.
  */
-static void doDot (Agraph_t* g)
+void doDot (Agraph_t* g)
 {
     Agraph_t **ccs;
     Agraph_t *sg;

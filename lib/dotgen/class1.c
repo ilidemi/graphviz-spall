@@ -28,7 +28,7 @@ int nonconstraint_edge(edge_t * e)
     return FALSE;
 }
 
-static void 
+void 
 interclust1(graph_t * g, node_t * t, node_t * h, edge_t * e)
 {
     node_t *v, *t0, *h0;

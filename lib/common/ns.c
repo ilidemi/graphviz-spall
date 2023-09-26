@@ -21,12 +21,12 @@
 #include <stdbool.h>
 #include <stddef.h>
 
-static void dfs_cutval(node_t * v, edge_t * par);
-static int dfs_range_init(node_t * v, edge_t * par, int low);
-static int dfs_range(node_t * v, edge_t * par, int low);
-static int x_val(edge_t * e, node_t * v, int dir);
+void dfs_cutval(node_t * v, edge_t * par);
+int dfs_range_init(node_t * v, edge_t * par, int low);
+int dfs_range(node_t * v, edge_t * par, int low);
+int x_val(edge_t * e, node_t * v, int dir);
 #ifdef DEBUG
-static void check_cycles(graph_t * g);
+void check_cycles(graph_t * g);
 #endif
 
 #define LENGTH(e)		(ND_rank(aghead(e)) - ND_rank(agtail(e)))
@@ -43,7 +43,7 @@ static int Search_size;
 static nlist_t Tree_node;
 static elist Tree_edge;
 
-static int add_tree_edge(edge_t * e)
+int add_tree_edge(edge_t * e)
 {
     node_t *n;
     //fprintf(stderr,"add tree edge %p %s ", (void*)e, agnameof(agtail(e))) ; fprintf(stderr,"%s\n", agnameof(aghead(e))) ;
@@ -82,7 +82,7 @@ static int add_tree_edge(edge_t * e)
  * (inclusively). Called when updating tree to improve pruning in dfs_range().
  * Assigns ND_low(n) = -1 for the affected nodes.
  */
-static void invalidate_path(node_t *lca, node_t *to_node) {
+void invalidate_path(node_t *lca, node_t *to_node) {
     while (true) {
         if (ND_low(to_node) == -1)
           break;
@@ -106,7 +106,7 @@ static void invalidate_path(node_t *lca, node_t *to_node) {
     }
 }
 
-static void exchange_tree_edges(edge_t * e, edge_t * f)
+void exchange_tree_edges(edge_t * e, edge_t * f)
 {
     node_t *n;
 
@@ -173,7 +173,7 @@ void init_rank(void)
     free_queue(Q);
 }
 
-static edge_t *leave_edge(void)
+edge_t *leave_edge(void)
 {
     edge_t *f, *rv = NULL;
     int cnt = 0;
@@ -212,7 +212,7 @@ static edge_t *leave_edge(void)
 static edge_t *Enter;
 static int Low, Lim, Slack;
 
-static void dfs_enter_outedge(node_t * v)
+void dfs_enter_outedge(node_t * v)
 {
     int i, slack;
     edge_t *e;
@@ -234,7 +234,7 @@ static void dfs_enter_outedge(node_t * v)
 	    dfs_enter_outedge(agtail(e));
 }
 
-static void dfs_enter_inedge(node_t * v)
+void dfs_enter_inedge(node_t * v)
 {
     int i, slack;
     edge_t *e;
@@ -256,7 +256,7 @@ static void dfs_enter_inedge(node_t * v)
 	    dfs_enter_inedge(aghead(e));
 }
 
-static edge_t *enter_edge(edge_t * e)
+edge_t *enter_edge(edge_t * e)
 {
     node_t *v;
     int outsearch;
@@ -280,7 +280,7 @@ static edge_t *enter_edge(edge_t * e)
     return Enter;
 }
 
-static void init_cutvalues(void)
+void init_cutvalues(void)
 {
     dfs_range_init(GD_nlist(G), NULL, 1);
     dfs_cutval(GD_nlist(G), NULL);
@@ -299,7 +299,7 @@ typedef struct subtree_s {
 } subtree_t;
 
 /* find initial tight subtrees */
-static int tight_subtree_search(Agnode_t *v, subtree_t *st)
+int tight_subtree_search(Agnode_t *v, subtree_t *st)
 {
     Agedge_t *e;
     int     i;
@@ -328,7 +328,7 @@ static int tight_subtree_search(Agnode_t *v, subtree_t *st)
     return rv;
 }
 
-static subtree_t *find_tight_subtree(Agnode_t *v)
+subtree_t *find_tight_subtree(Agnode_t *v)
 {
     subtree_t       *rv;
     rv = gv_alloc(sizeof(subtree_t));
@@ -347,7 +347,7 @@ typedef struct STheap_s {
         int             size;
 } STheap_t;
 
-static subtree_t *STsetFind(Agnode_t *n0)
+subtree_t *STsetFind(Agnode_t *n0)
 {
   subtree_t *s0 = ND_subtree(n0);
   while  (s0->par && s0->par != s0) {
@@ -357,7 +357,7 @@ static subtree_t *STsetFind(Agnode_t *n0)
   return s0;
 }
  
-static subtree_t *STsetUnion(subtree_t *s0, subtree_t *s1)
+subtree_t *STsetUnion(subtree_t *s0, subtree_t *s1)
 {
   subtree_t *r0, *r1, *r;
 
@@ -377,7 +377,7 @@ static subtree_t *STsetUnion(subtree_t *s0, subtree_t *s1)
 }
 
 /* find tightest edge to another tree incident on the given tree */
-static Agedge_t *inter_tree_edge_search(Agnode_t *v, Agnode_t *from, Agedge_t *best)
+Agedge_t *inter_tree_edge_search(Agnode_t *v, Agnode_t *from, Agedge_t *best)
 {
     int i;
     Agedge_t *e;
@@ -410,17 +410,16 @@ static Agedge_t *inter_tree_edge_search(Agnode_t *v, Agnode_t *from, Agedge_t *b
     return best;
 }
 
-static Agedge_t *inter_tree_edge(subtree_t *tree)
+Agedge_t *inter_tree_edge(subtree_t *tree)
 {
     Agedge_t *rv;
     rv = inter_tree_edge_search(tree->rep, NULL, NULL);
     return rv;
 }
 
-static
 int STheapsize(STheap_t *heap) { return heap->size; }
 
-static 
+
 void STheapify(STheap_t *heap, int i)
 {
     int left, right, smallest;
@@ -582,7 +581,7 @@ end:
 }
 
 /* walk up from v to LCA(v,w), setting new cutvalues. */
-static Agnode_t *treeupdate(Agnode_t * v, Agnode_t * w, int cutvalue, int dir)
+Agnode_t *treeupdate(Agnode_t * v, Agnode_t * w, int cutvalue, int dir)
 {
     edge_t *e;
     int d;
@@ -605,7 +604,7 @@ static Agnode_t *treeupdate(Agnode_t * v, Agnode_t * w, int cutvalue, int dir)
     return v;
 }
 
-static void rerank(Agnode_t * v, int delta)
+void rerank(Agnode_t * v, int delta)
 {
     int i;
     edge_t *e;
@@ -622,7 +621,7 @@ static void rerank(Agnode_t * v, int delta)
 /* e is the tree edge that is leaving and f is the nontree edge that
  * is entering.  compute new cut values, ranks, and exchange e and f.
  */
-static int
+int
 update(edge_t * e, edge_t * f)
 {
     int cutvalue, delta;
@@ -666,7 +665,7 @@ update(edge_t * e, edge_t * f)
     return 0;
 }
 
-static void scan_and_normalize(void)
+void scan_and_normalize(void)
 {
     node_t *n;
 
@@ -683,7 +682,7 @@ static void scan_and_normalize(void)
     Maxrank -= Minrank;
 }
 
-static void
+void
 freeTreeList (graph_t* g)
 {
     node_t *n;
@@ -694,7 +693,7 @@ freeTreeList (graph_t* g)
     }
 }
 
-static void LR_balance(void)
+void LR_balance(void)
 {
     int delta;
     edge_t *e, *f;
@@ -717,7 +716,7 @@ static void LR_balance(void)
     freeTreeList (G);
 }
 
-static int decreasingrankcmpf(node_t **n0, node_t **n1) {
+int decreasingrankcmpf(node_t **n0, node_t **n1) {
   if (ND_rank(*n1) < ND_rank(*n0)) {
     return -1;
   }
@@ -727,7 +726,7 @@ static int decreasingrankcmpf(node_t **n0, node_t **n1) {
   return 0;
 }
 
-static int increasingrankcmpf(node_t **n0, node_t **n1) {
+int increasingrankcmpf(node_t **n0, node_t **n1) {
   if (ND_rank(*n0) < ND_rank(*n1)) {
     return -1;
   }
@@ -737,7 +736,7 @@ static int increasingrankcmpf(node_t **n0, node_t **n1) {
   return 0;
 }
 
-static void TB_balance(void)
+void TB_balance(void)
 {
     node_t *n;
     edge_t *e;
@@ -817,7 +816,7 @@ static void TB_balance(void)
     free(nrank);
 }
 
-static bool init_graph(graph_t *g) {
+bool init_graph(graph_t *g) {
     node_t *n;
     edge_t *e;
 
@@ -858,7 +857,7 @@ static bool init_graph(graph_t *g) {
 /* graphSize:
  * Compute no. of nodes and edges in the graph
  */
-static void
+void
 graphSize (graph_t * g, int* nn, int* ne)
 {
     int i, nnodes, nedges;
@@ -979,7 +978,7 @@ int rank(graph_t * g, int balance, int maxiter)
 }
 
 /* set cut value of f, assuming values of edges on one side were already set */
-static void x_cutval(edge_t * f)
+void x_cutval(edge_t * f)
 {
     node_t *v;
     edge_t *e;
@@ -1002,7 +1001,7 @@ static void x_cutval(edge_t * f)
     ED_cutvalue(f) = sum;
 }
 
-static int x_val(edge_t * e, node_t * v, int dir)
+int x_val(edge_t * e, node_t * v, int dir)
 {
     node_t *other;
     int d, rv, f;
@@ -1040,7 +1039,7 @@ static int x_val(edge_t * e, node_t * v, int dir)
     return rv;
 }
 
-static void dfs_cutval(node_t * v, edge_t * par)
+void dfs_cutval(node_t * v, edge_t * par)
 {
     int i;
     edge_t *e;
@@ -1061,7 +1060,7 @@ static void dfs_cutval(node_t * v, edge_t * par)
 * ND_low(n) - min DFS index for nodes in sub-tree (>= 1)
 * ND_lim(n) - max DFS index for nodes in sub-tree
 */
-static int dfs_range_init(node_t *v, edge_t *par, int low) {
+int dfs_range_init(node_t *v, edge_t *par, int low) {
     int i, lim;
 
     lim = low;
@@ -1090,7 +1089,7 @@ static int dfs_range_init(node_t *v, edge_t *par, int low) {
 /*
  * Incrementally updates DFS range attributes
  */
-static int dfs_range(node_t * v, edge_t * par, int low)
+int dfs_range(node_t * v, edge_t * par, int low)
 {
     edge_t *e;
     int i, lim;
@@ -1142,7 +1141,7 @@ void check_fast_node(node_t * n)
     assert(nptr != NULL);
 }
 
-static char* dump_node (node_t* n)
+char* dump_node (node_t* n)
 {
     static char buf[50];
 
@@ -1154,7 +1153,7 @@ static char* dump_node (node_t* n)
 	return agnameof(n);
 }
 
-static void dump_graph (graph_t* g)
+void dump_graph (graph_t* g)
 {
     int i;
     edge_t *e;
@@ -1176,7 +1175,7 @@ static void dump_graph (graph_t* g)
     fclose (fp);
 }
 
-static node_t *checkdfs(graph_t* g, node_t * n)
+node_t *checkdfs(graph_t* g, node_t * n)
 {
     edge_t *e;
     node_t *w,*x;

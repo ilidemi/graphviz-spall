@@ -66,23 +66,23 @@ static triangles_t tris;
 static Ppoint_t *ops;
 static size_t opn;
 
-static int triangulate(pointnlink_t **, int);
-static bool isdiagonal(int, int, pointnlink_t **, int);
-static int loadtriangle(pointnlink_t *, pointnlink_t *, pointnlink_t *);
-static void connecttris(size_t, size_t);
-static bool marktripath(size_t, size_t);
+int triangulate(pointnlink_t **, int);
+bool isdiagonal(int, int, pointnlink_t **, int);
+int loadtriangle(pointnlink_t *, pointnlink_t *, pointnlink_t *);
+void connecttris(size_t, size_t);
+bool marktripath(size_t, size_t);
 
-static void add2dq(deque_t *dq, int, pointnlink_t*);
-static void splitdq(deque_t *dq, int, size_t);
-static size_t finddqsplit(const deque_t *dq, pointnlink_t*);
+void add2dq(deque_t *dq, int, pointnlink_t*);
+void splitdq(deque_t *dq, int, size_t);
+size_t finddqsplit(const deque_t *dq, pointnlink_t*);
 
-static int ccw(Ppoint_t *, Ppoint_t *, Ppoint_t *);
-static bool intersects(Ppoint_t *, Ppoint_t *, Ppoint_t *, Ppoint_t *);
-static bool between(Ppoint_t *, Ppoint_t *, Ppoint_t *);
-static int pointintri(size_t, Ppoint_t *);
+int ccw(Ppoint_t *, Ppoint_t *, Ppoint_t *);
+bool intersects(Ppoint_t *, Ppoint_t *, Ppoint_t *, Ppoint_t *);
+bool between(Ppoint_t *, Ppoint_t *, Ppoint_t *);
+int pointintri(size_t, Ppoint_t *);
 
-static int growpnls(size_t);
-static int growops(size_t);
+int growpnls(size_t);
+int shrt_growops(size_t);
 
 /* Pshortestpath:
  * Find a shortest path contained in the polygon polyp going between the
@@ -200,7 +200,7 @@ int Pshortestpath(Ppoly_t * polyp, Ppoint_t eps[2], Ppolyline_t * output)
 	prerror("cannot find triangle path");
 	free(dq.pnlps);
 	/* a straight line is better than failing */
-	if (growops(2) != 0)
+	if (shrt_growops(2) != 0)
 		return -2;
 	output->pn = 2;
 	ops[0] = eps[0], ops[1] = eps[1];
@@ -211,7 +211,7 @@ int Pshortestpath(Ppoly_t * polyp, Ppoint_t eps[2], Ppolyline_t * output)
     /* if endpoints in same triangle, use a single line */
     if (ftrii == ltrii) {
 	free(dq.pnlps);
-	if (growops(2) != 0)
+	if (shrt_growops(2) != 0)
 		return -2;
 	output->pn = 2;
 	ops[0] = eps[0], ops[1] = eps[1];
@@ -291,7 +291,7 @@ int Pshortestpath(Ppoly_t * polyp, Ppoint_t eps[2], Ppolyline_t * output)
     size_t i;
     for (i = 0, pnlp = &epnls[1]; pnlp; pnlp = pnlp->link)
 	i++;
-    if (growops(i) != 0)
+    if (shrt_growops(i) != 0)
 	return -2;
     assert(i <= INT_MAX);
     output->pn = (int)i;
@@ -303,7 +303,7 @@ int Pshortestpath(Ppoly_t * polyp, Ppoint_t eps[2], Ppolyline_t * output)
 }
 
 /* triangulate polygon */
-static int triangulate(pointnlink_t **points, int point_count) {
+int triangulate(pointnlink_t **points, int point_count) {
     int pnli, pnlip1, pnlip2;
 
 	if (point_count > 3)
@@ -332,7 +332,7 @@ static int triangulate(pointnlink_t **points, int point_count) {
 }
 
 /* check if (i, i + 2) is a diagonal */
-static bool isdiagonal(int pnli, int pnlip2, pointnlink_t **points,
+bool isdiagonal(int pnli, int pnlip2, pointnlink_t **points,
                        int point_count) {
     int pnlip1, pnlim1, pnlj, pnljp1, res;
 
@@ -360,7 +360,7 @@ static bool isdiagonal(int pnli, int pnlip2, pointnlink_t **points,
     return true;
 }
 
-static int loadtriangle(pointnlink_t * pnlap, pointnlink_t * pnlbp,
+int loadtriangle(pointnlink_t * pnlap, pointnlink_t * pnlbp,
 			 pointnlink_t * pnlcp)
 {
     triangle_t trip = {0};
@@ -377,7 +377,7 @@ static int loadtriangle(pointnlink_t * pnlap, pointnlink_t * pnlbp,
 }
 
 /* connect a pair of triangles at their common edge (if any) */
-static void connecttris(size_t tri1, size_t tri2) {
+void connecttris(size_t tri1, size_t tri2) {
     triangle_t *tri1p, *tri2p;
     int ei, ej;
 
@@ -395,7 +395,7 @@ static void connecttris(size_t tri1, size_t tri2) {
 }
 
 /* find and mark path from trii, to trij */
-static bool marktripath(size_t trii, size_t trij) {
+bool marktripath(size_t trii, size_t trij) {
     int ei;
 
     if (triangles_get(&tris, trii).mark)
@@ -412,7 +412,7 @@ static bool marktripath(size_t trii, size_t trij) {
 }
 
 /* add a new point to the deque, either front or back */
-static void add2dq(deque_t *dq, int side, pointnlink_t *pnlp) {
+void add2dq(deque_t *dq, int side, pointnlink_t *pnlp) {
     if (side == DQ_FRONT) {
 	if (dq->lpnlpi >= dq->fpnlpi)
 	    pnlp->link = dq->pnlps[dq->fpnlpi];	/* shortest path links */
@@ -426,14 +426,14 @@ static void add2dq(deque_t *dq, int side, pointnlink_t *pnlp) {
     }
 }
 
-static void splitdq(deque_t *dq, int side, size_t index) {
+void splitdq(deque_t *dq, int side, size_t index) {
     if (side == DQ_FRONT)
 	dq->lpnlpi = index;
     else
 	dq->fpnlpi = index;
 }
 
-static size_t finddqsplit(const deque_t *dq, pointnlink_t *pnlp) {
+size_t finddqsplit(const deque_t *dq, pointnlink_t *pnlp) {
     for (size_t index = dq->fpnlpi; index < dq->apex; index++)
 	if (ccw(dq->pnlps[index + 1]->pp, dq->pnlps[index]->pp, pnlp->pp) == ISCCW)
 	    return index;
@@ -444,7 +444,7 @@ static size_t finddqsplit(const deque_t *dq, pointnlink_t *pnlp) {
 }
 
 /* ccw test: CCW, CW, or co-linear */
-static int ccw(Ppoint_t * p1p, Ppoint_t * p2p, Ppoint_t * p3p)
+int ccw(Ppoint_t * p1p, Ppoint_t * p2p, Ppoint_t * p3p)
 {
     double d;
 
@@ -454,7 +454,7 @@ static int ccw(Ppoint_t * p1p, Ppoint_t * p2p, Ppoint_t * p3p)
 }
 
 /* line to line intersection */
-static bool intersects(Ppoint_t * pap, Ppoint_t * pbp,
+bool intersects(Ppoint_t * pap, Ppoint_t * pbp,
 		      Ppoint_t * pcp, Ppoint_t * pdp)
 {
     int ccw1, ccw2, ccw3, ccw4;
@@ -475,7 +475,7 @@ static bool intersects(Ppoint_t * pap, Ppoint_t * pbp,
 }
 
 /* is pbp between pap and pcp */
-static bool between(Ppoint_t * pap, Ppoint_t * pbp, Ppoint_t * pcp)
+bool between(Ppoint_t * pap, Ppoint_t * pbp, Ppoint_t * pcp)
 {
     Ppoint_t p1, p2;
 
@@ -487,7 +487,7 @@ static bool between(Ppoint_t * pap, Ppoint_t * pbp, Ppoint_t * pcp)
 	p2.x * p2.x + p2.y * p2.y <= p1.x * p1.x + p1.y * p1.y;
 }
 
-static int pointintri(size_t trii, Ppoint_t *pp) {
+int pointintri(size_t trii, Ppoint_t *pp) {
     int ei, sum;
 
     for (ei = 0, sum = 0; ei < 3; ei++)
@@ -497,7 +497,7 @@ static int pointintri(size_t trii, Ppoint_t *pp) {
     return sum == 3 || sum == 0;
 }
 
-static int growpnls(size_t newpnln) {
+int growpnls(size_t newpnln) {
     if (newpnln <= pnln)
 	return 0;
     pointnlink_t *new_pnls = realloc(pnls, POINTNLINKSIZE * newpnln);
@@ -516,7 +516,7 @@ static int growpnls(size_t newpnln) {
     return 0;
 }
 
-static int growops(size_t newopn) {
+int shrt_growops(size_t newopn) {
     if (newopn <= opn)
 	return 0;
     Ppoint_t *new_ops = realloc(ops, POINTSIZE * newopn);

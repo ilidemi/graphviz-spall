@@ -122,7 +122,7 @@ int match(char *str, char *pat)
  * Add all edges in root graph connecting two nodes in 
  * selected to selected.
  */
-void nodeInduce(Agraph_t * selected)
+void gvprNodeInduce(Agraph_t * selected)
 {
     Agnode_t *n;
     Agedge_t *e;

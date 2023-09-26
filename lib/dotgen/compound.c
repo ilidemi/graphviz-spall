@@ -20,7 +20,7 @@
  * the box bp. Assume cp is outside the box, and pp is
  * on or in the box. 
  */
-static pointf boxIntersectf(pointf pp, pointf cp, boxf * bp)
+pointf boxIntersectf(pointf pp, pointf cp, boxf * bp)
 {
     pointf ipp;
     double ppx = pp.x;
@@ -70,7 +70,7 @@ static pointf boxIntersectf(pointf pp, pointf cp, boxf * bp)
 /* inBoxf:
  * Returns true if p is on or in box bb
  */
-static int inBoxf(pointf p, boxf * bb)
+int inBoxf(pointf p, boxf * bb)
 {
     return INSIDE(p, *bb);
 }
@@ -80,7 +80,7 @@ static int inBoxf(pointf p, boxf * bb)
  * Returns NULL if no name is given, or subgraph of
  * that name does not exist.
  */
-static graph_t *getCluster(char *cluster_name, Dt_t *map) {
+graph_t *getCluster(char *cluster_name, Dt_t *map) {
     Agraph_t* sg;
 
     if (!cluster_name || *cluster_name == '\0')
@@ -105,7 +105,7 @@ static graph_t *getCluster(char *cluster_name, Dt_t *map) {
  * Return the number of times the Bezier control polygon crosses
  * the vertical line x = xcoord.
  */
-static int countVertCross(pointf * pts, double xcoord)
+int countVertCross(pointf * pts, double xcoord)
 {
     int i;
     int sign, old_sign;
@@ -127,7 +127,7 @@ static int countVertCross(pointf * pts, double xcoord)
  * Return the number of times the Bezier control polygon crosses
  * the horizontal line y = ycoord.
  */
-static int countHorzCross(pointf * pts, double ycoord)
+int countHorzCross(pointf * pts, double ycoord)
 {
     int i;
     int sign, old_sign;
@@ -153,7 +153,7 @@ static int countHorzCross(pointf * pts, double ycoord)
  * [(xcoord,ymin),(xcoord,ymax)]. Return -1 if not found.
  * This is done by binary subdivision. 
  */
-static double
+double
 findVertical(pointf * pts, double tmin, double tmax,
 	     double xcoord, double ymin, double ymax)
 {
@@ -195,7 +195,7 @@ findVertical(pointf * pts, double tmin, double tmax,
  * [(xmin,ycoord),(xmax,ycoord)]. Return -1 if not found.
  * This is done by binary subdivision. 
  */
-static double
+double
 findHorizontal(pointf * pts, double tmin, double tmax,
 	       double ycoord, double xmin, double xmax)
 {
@@ -237,7 +237,7 @@ findHorizontal(pointf * pts, double tmin, double tmax,
  * with pts[3] being on the box, and 1 is returned. Otherwise, pts
  * is left unchanged and 0 is returned.
  */
-static int splineIntersectf(pointf * pts, boxf * bb)
+int splineIntersectf(pointf * pts, boxf * bb)
 {
     double tmin = 2.0;
     double t;
@@ -285,7 +285,7 @@ static int splineIntersectf(pointf * pts, boxf * bb)
  * with n control points where n >= 4 and n (mod 3) = 1.
  * If edge has arrowheads, reposition them.
  */
-static void makeCompoundEdge(edge_t *e, Dt_t *clustMap) {
+void makeCompoundEdge(edge_t *e, Dt_t *clustMap) {
     int starti = 0, endi = 0;	/* index of first and last control point */
 
     /* find head and tail target clusters, if defined */

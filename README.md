@@ -1,3 +1,23 @@
+A 9.0.0 version of GraphViz, instrumented with [Spall](https://gravitymoth.com/spall/spall-web.html) auto-tracing
+
+![Screenshot](screenshot.png)
+
+Changes:
+* `build.sh` that builds GraphViz as one executable. This circumvents libtool that seems to lose the function instrumentation in libraries.
+* Many `static` functions made non-static so that their symbols show up in the trace, conflicts renamed
+
+How to build:
+```
+./autogen.sh
+./configure CC=clang
+make                  # To run yacc and such. Fails at dot and that is expected
+./build.sh
+
+./dot --version
+```
+
+---
+
 # Graphviz - Graph Visualization Tools
 
 [![build status](https://gitlab.com/graphviz/graphviz/badges/main/pipeline.svg)](https://gitlab.com/graphviz/graphviz/-/pipelines/)

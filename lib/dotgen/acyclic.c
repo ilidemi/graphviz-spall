@@ -28,8 +28,8 @@ void reverse_edge(edge_t * e)
 	virtual_edge(aghead(e), agtail(e), e);
 }
 
-static void 
-dfs(node_t * n)
+void 
+acyc_dfs(node_t * n)
 {
     int i;
     edge_t *e;
@@ -46,7 +46,7 @@ dfs(node_t * n)
 	    i--;
 	} else {
 	    if (!ND_mark(w))
-		dfs(w);
+		acyc_dfs(w);
 	}
     }
     ND_onstack(n) = false;
@@ -62,7 +62,7 @@ void acyclic(graph_t * g)
 	for (n = GD_nlist(g); n; n = ND_next(n))
 	    ND_mark(n) = FALSE;
 	for (n = GD_nlist(g); n; n = ND_next(n))
-	    dfs(n);
+	    acyc_dfs(n);
     }
 }
 

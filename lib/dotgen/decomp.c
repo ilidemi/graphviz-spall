@@ -25,13 +25,13 @@
 static node_t *Last_node;
 static size_t Cmark;
 
-static void 
+void 
 begin_component(graph_t* g)
 {
     Last_node = GD_nlist(g) = NULL;
 }
 
-static void 
+void 
 add_to_component(graph_t* g, node_t * n)
 {
     GD_n_nodes(g)++;
@@ -47,7 +47,7 @@ add_to_component(graph_t* g, node_t * n)
     ND_next(n) = NULL;
 }
 
-static void 
+void 
 end_component(graph_t* g)
 {
     size_t i = GD_comp(g).size++;
@@ -55,12 +55,12 @@ end_component(graph_t* g)
     GD_comp(g).list[i] = GD_nlist(g);
 }
 
-static void push(gv_stack_t *sp, node_t *np) {
+void dec_push(gv_stack_t *sp, node_t *np) {
   ND_mark(np) = Cmark + 1;
   stack_push(sp, np);
 }
 
-static node_t *pop(gv_stack_t *sp) {
+node_t *dec_pop(gv_stack_t *sp) {
 
   if (stack_is_empty(sp)) {
     return NULL;
@@ -77,15 +77,15 @@ static node_t *pop(gv_stack_t *sp) {
  * in this call to decompose will have mark < Cmark; processed nodes will have mark=Cmark;
  * so we use mark = Cmark+1 to indicate nodes on the stack.
  */
-static void search_component(gv_stack_t *stk, graph_t *g, node_t *n) {
+void search_component(gv_stack_t *stk, graph_t *g, node_t *n) {
     int c;
     elist vec[4];
     node_t *other;
     edge_t *e;
     edge_t **ep;
 
-    push(stk, n);
-    while ((n = pop(stk))) {
+    dec_push(stk, n);
+    while ((n = dec_pop(stk))) {
 	if (ND_mark(n) == Cmark) continue;
 	add_to_component(g, n);
 	vec[0] = ND_out(n);
@@ -101,7 +101,7 @@ static void search_component(gv_stack_t *stk, graph_t *g, node_t *n) {
 		    if ((other = aghead(e)) == n)
 			other = agtail(e);
 		    if ((ND_mark(other) != Cmark) && (other == UF_find(other)))
-			push(stk, other);
+			dec_push(stk, other);
 		}
 	    }
 	}

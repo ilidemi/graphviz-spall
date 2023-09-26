@@ -33,32 +33,32 @@ typedef struct tna_t {
 static Ppoint_t *ops;
 static int opn, opl;
 
-static int reallyroutespline(Pedge_t *, int,
+int reallyroutespline(Pedge_t *, int,
 			     Ppoint_t *, int, Ppoint_t, Ppoint_t);
-static int mkspline(Ppoint_t *, int, tna_t *, Ppoint_t, Ppoint_t,
+int mkspline(Ppoint_t *, int, tna_t *, Ppoint_t, Ppoint_t,
 		    Ppoint_t *, Ppoint_t *, Ppoint_t *, Ppoint_t *);
-static int splinefits(Pedge_t *, int, Ppoint_t, Pvector_t, Ppoint_t,
+int splinefits(Pedge_t *, int, Ppoint_t, Pvector_t, Ppoint_t,
 		      Pvector_t, Ppoint_t *, int);
-static int splineisinside(Pedge_t *, int, Ppoint_t *);
-static int splineintersectsline(Ppoint_t *, Ppoint_t *, double *);
-static void points2coeff(double, double, double, double, double *);
-static void addroot(double, double *, int *);
+int splineisinside(Pedge_t *, int, Ppoint_t *);
+int splineintersectsline(Ppoint_t *, Ppoint_t *, double *);
+void points2coeff(double, double, double, double, double *);
+void addroot(double, double *, int *);
 
-static Pvector_t normv(Pvector_t);
+Pvector_t normv(Pvector_t);
 
-static int growops(int);
+int growops(int);
 
-static Ppoint_t add(Ppoint_t, Ppoint_t);
-static Ppoint_t sub(Ppoint_t, Ppoint_t);
-static double dist(Ppoint_t, Ppoint_t);
-static Ppoint_t scale(Ppoint_t, double);
-static double dot(Ppoint_t, Ppoint_t);
-static double B0(double t);
-static double B1(double t);
-static double B2(double t);
-static double B3(double t);
-static double B01(double t);
-static double B23(double t);
+Ppoint_t add(Ppoint_t, Ppoint_t);
+Ppoint_t sub(Ppoint_t, Ppoint_t);
+double route_dist(Ppoint_t, Ppoint_t);
+Ppoint_t scale(Ppoint_t, double);
+double route_dot(Ppoint_t, Ppoint_t);
+double B0(double t);
+double B1(double t);
+double B2(double t);
+double B3(double t);
+double B01(double t);
+double B23(double t);
 
 /* Proutespline:
  * Given a set of edgen line segments edges as obstacles, a template
@@ -92,7 +92,7 @@ int Proutespline(Pedge_t * edges, int edgen, Ppolyline_t input,
     return 0;
 }
 
-static int reallyroutespline(Pedge_t * edges, int edgen,
+int reallyroutespline(Pedge_t * edges, int edgen,
 			     Ppoint_t * inps, int inpn, Ppoint_t ev0,
 			     Ppoint_t ev1)
 {
@@ -113,7 +113,7 @@ static int reallyroutespline(Pedge_t * edges, int edgen,
     }
     tnas[0].t = 0;
     for (i = 1; i < inpn; i++)
-	tnas[i].t = tnas[i - 1].t + dist(inps[i], inps[i - 1]);
+	tnas[i].t = tnas[i - 1].t + route_dist(inps[i], inps[i - 1]);
     for (i = 1; i < inpn; i++)
 	tnas[i].t /= tnas[inpn - 1].t;
     for (i = 0; i < inpn; i++) {
@@ -135,7 +135,7 @@ static int reallyroutespline(Pedge_t * edges, int edgen,
 	t = tnas[i].t;
 	p.x = B0(t) * p1.x + B1(t) * cp1.x + B2(t) * cp2.x + B3(t) * p2.x;
 	p.y = B0(t) * p1.y + B1(t) * cp1.y + B2(t) * cp2.y + B3(t) * p2.y;
-	if ((d = dist(p, inps[i])) > maxd)
+	if ((d = route_dist(p, inps[i])) > maxd)
 	    maxd = d, maxi = i;
     }
     spliti = maxi;
@@ -152,7 +152,7 @@ static int reallyroutespline(Pedge_t * edges, int edgen,
     return 0;
 }
 
-static int mkspline(Ppoint_t * inps, int inpn, tna_t * tnas, Ppoint_t ev0,
+int mkspline(Ppoint_t * inps, int inpn, tna_t * tnas, Ppoint_t ev0,
 		    Ppoint_t ev1, Ppoint_t * sp0, Ppoint_t * sv0,
 		    Ppoint_t * sp1, Ppoint_t * sv1)
 {
@@ -165,14 +165,14 @@ static int mkspline(Ppoint_t * inps, int inpn, tna_t * tnas, Ppoint_t ev0,
     c[0][0] = c[0][1] = c[1][0] = c[1][1] = 0.0;
     x[0] = x[1] = 0.0;
     for (i = 0; i < inpn; i++) {
-	c[0][0] += dot(tnas[i].a[0], tnas[i].a[0]);
-	c[0][1] += dot(tnas[i].a[0], tnas[i].a[1]);
+	c[0][0] += route_dot(tnas[i].a[0], tnas[i].a[0]);
+	c[0][1] += route_dot(tnas[i].a[0], tnas[i].a[1]);
 	c[1][0] = c[0][1];
-	c[1][1] += dot(tnas[i].a[1], tnas[i].a[1]);
+	c[1][1] += route_dot(tnas[i].a[1], tnas[i].a[1]);
 	tmp = sub(inps[i], add(scale(inps[0], B01(tnas[i].t)),
 			       scale(inps[inpn - 1], B23(tnas[i].t))));
-	x[0] += dot(tnas[i].a[0], tmp);
-	x[1] += dot(tnas[i].a[1], tmp);
+	x[0] += route_dot(tnas[i].a[0], tmp);
+	x[1] += route_dot(tnas[i].a[1], tmp);
     }
     det01 = c[0][0] * c[1][1] - c[1][0] * c[0][1];
     det0X = c[0][0] * x[1] - c[0][1] * x[0];
@@ -182,7 +182,7 @@ static int mkspline(Ppoint_t * inps, int inpn, tna_t * tnas, Ppoint_t ev0,
 	scale3 = det0X / det01;
     }
     if (fabs(det01) < 1e-6 || scale0 <= 0.0 || scale3 <= 0.0) {
-	d01 = dist(inps[0], inps[inpn - 1]) / 3.0;
+	d01 = route_dist(inps[0], inps[inpn - 1]) / 3.0;
 	scale0 = d01;
 	scale3 = d01;
     }
@@ -193,7 +193,7 @@ static int mkspline(Ppoint_t * inps, int inpn, tna_t * tnas, Ppoint_t ev0,
     return 0;
 }
 
-static double dist_n(Ppoint_t * p, int n)
+double dist_n(Ppoint_t * p, int n)
 {
     int i;
     double rv;
@@ -205,7 +205,7 @@ static double dist_n(Ppoint_t * p, int n)
     return rv;
 }
 
-static int splinefits(Pedge_t * edges, int edgen, Ppoint_t pa,
+int splinefits(Pedge_t * edges, int edgen, Ppoint_t pa,
 		      Pvector_t va, Ppoint_t pb, Pvector_t vb,
 		      Ppoint_t * inps, int inpn)
 {
@@ -278,7 +278,7 @@ static int splinefits(Pedge_t * edges, int edgen, Ppoint_t pa,
     return 0;
 }
 
-static int splineisinside(Pedge_t * edges, int edgen, Ppoint_t * sps)
+int splineisinside(Pedge_t * edges, int edgen, Ppoint_t * sps)
 {
     double roots[4];
     int rooti, rootn;
@@ -311,7 +311,7 @@ static int splineisinside(Pedge_t * edges, int edgen, Ppoint_t * sps)
     return 1;
 }
 
-static int splineintersectsline(Ppoint_t * sps, Ppoint_t * lps,
+int splineintersectsline(Ppoint_t * sps, Ppoint_t * lps,
 				double *roots)
 {
     double scoeff[4], xcoeff[2], ycoeff[2];
@@ -391,7 +391,7 @@ static int splineintersectsline(Ppoint_t * sps, Ppoint_t * lps,
     }
 }
 
-static void points2coeff(double v0, double v1, double v2, double v3,
+void points2coeff(double v0, double v1, double v2, double v3,
 			 double *coeff)
 {
     coeff[3] = v3 + 3 * v1 - (v0 + 3 * v2);
@@ -400,13 +400,13 @@ static void points2coeff(double v0, double v1, double v2, double v3,
     coeff[0] = v0;
 }
 
-static void addroot(double root, double *roots, int *rootnp)
+void addroot(double root, double *roots, int *rootnp)
 {
     if (root >= 0 && root <= 1)
 	roots[*rootnp] = root, (*rootnp)++;
 }
 
-static Pvector_t normv(Pvector_t v)
+Pvector_t normv(Pvector_t v)
 {
     double d;
 
@@ -418,7 +418,7 @@ static Pvector_t normv(Pvector_t v)
     return v;
 }
 
-static int growops(int newopn)
+int growops(int newopn)
 {
     if (newopn <= opn)
 	return 0;
@@ -429,19 +429,19 @@ static int growops(int newopn)
     return 0;
 }
 
-static Ppoint_t add(Ppoint_t p1, Ppoint_t p2)
+Ppoint_t add(Ppoint_t p1, Ppoint_t p2)
 {
     p1.x += p2.x, p1.y += p2.y;
     return p1;
 }
 
-static Ppoint_t sub(Ppoint_t p1, Ppoint_t p2)
+Ppoint_t sub(Ppoint_t p1, Ppoint_t p2)
 {
     p1.x -= p2.x, p1.y -= p2.y;
     return p1;
 }
 
-static double dist(Ppoint_t p1, Ppoint_t p2)
+double route_dist(Ppoint_t p1, Ppoint_t p2)
 {
     double dx, dy;
 
@@ -449,47 +449,47 @@ static double dist(Ppoint_t p1, Ppoint_t p2)
     return hypot(dx, dy);
 }
 
-static Ppoint_t scale(Ppoint_t p, double c)
+Ppoint_t scale(Ppoint_t p, double c)
 {
     p.x *= c, p.y *= c;
     return p;
 }
 
-static double dot(Ppoint_t p1, Ppoint_t p2)
+double route_dot(Ppoint_t p1, Ppoint_t p2)
 {
     return p1.x * p2.x + p1.y * p2.y;
 }
 
-static double B0(double t)
+double B0(double t)
 {
     double tmp = 1.0 - t;
     return tmp * tmp * tmp;
 }
 
-static double B1(double t)
+double B1(double t)
 {
     double tmp = 1.0 - t;
     return 3 * t * tmp * tmp;
 }
 
-static double B2(double t)
+double B2(double t)
 {
     double tmp = 1.0 - t;
     return 3 * t * t * tmp;
 }
 
-static double B3(double t)
+double B3(double t)
 {
     return t * t * t;
 }
 
-static double B01(double t)
+double B01(double t)
 {
     double tmp = 1.0 - t;
     return tmp * tmp * (tmp + 3 * t);
 }
 
-static double B23(double t)
+double B23(double t)
 {
     double tmp = 1.0 - t;
     return t * t * (3 * tmp + t);

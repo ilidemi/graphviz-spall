@@ -26,14 +26,14 @@ typedef struct same_t {
     edge_list_t l; // edges in the group
 } same_t;
 
-static void free_same(same_t s) {
+void free_same(same_t s) {
   edge_list_free(&s.l);
 }
 
 DEFINE_LIST_WITH_DTOR(same_list, same_t, free_same)
 
-static void sameedge(same_list_t *same, edge_t *e, char *id);
-static void sameport(node_t *u, edge_list_t l);
+void sameedge(same_list_t *same, edge_t *e, char *id);
+void sameport(node_t *u, edge_list_t l);
 
 void dot_sameports(graph_t * g)
 /* merge edge ports in G */
@@ -75,7 +75,7 @@ void dot_sameports(graph_t * g)
 }
 
 /// register \p e in the \p same structure of the originating node under \p id
-static void sameedge(same_list_t *same, edge_t *e, char *id) {
+void sameedge(same_list_t *same, edge_t *e, char *id) {
     for (size_t i = 0; i < same_list_size(same); i++)
 	if (streq(same_list_get(same, i).id, id)) {
 	    edge_list_append(&same_list_at(same, i)->l, e);
@@ -87,7 +87,7 @@ static void sameedge(same_list_t *same, edge_t *e, char *id) {
     same_list_append(same, to_append);
 }
 
-static void sameport(node_t *u, edge_list_t l)
+void sameport(node_t *u, edge_list_t l)
 /* make all edges in L share the same port on U. The port is placed on the
    node boundary and the average angle between the edges. FIXME: this assumes
    naively that the edges are straight lines, which is wrong if they are long.

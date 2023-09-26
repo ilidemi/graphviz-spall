@@ -30,10 +30,10 @@ static int polypointn;        /* size of polypoints[] */
 static Pedge_t *edges;        /* polygon edges passed to Proutespline */
 static int edgen;             /* size of edges[] */
 
-static int checkpath(int, boxf*, path*);
-static void printpath(path * pp);
+int checkpath(int, boxf*, path*);
+void printpath(path * pp);
 #ifdef DEBUG
-static void printboxes(int boxn, boxf* boxes)
+void printboxes(int boxn, boxf* boxes)
 {
     pointf ll, ur;
     int bi;
@@ -47,7 +47,7 @@ static void printboxes(int boxn, boxf* boxes)
 }
 
 #if DEBUG > 1
-static void psprintpolypts(Ppoint_t * p, int sz)
+void psprintpolypts(Ppoint_t * p, int sz)
 {
     int i;
 
@@ -58,7 +58,7 @@ static void psprintpolypts(Ppoint_t * p, int sz)
 	fprintf(stderr, "%f %f %s\n", p[i].x, p[i].y, i == 0 ? "moveto" : "lineto");
     fprintf(stderr, "closepath stroke\n");
 }
-static void psprintpoint(point p)
+void psprintpoint(point p)
 {
     fprintf(stderr, "gsave\n");
     fprintf(stderr,
@@ -69,7 +69,7 @@ static void psprintpoint(point p)
 	    p.x, p.y);
     fprintf(stderr, "grestore\n");
 }
-static void psprintpointf(pointf p)
+void psprintpointf(pointf p)
 {
     fprintf(stderr, "gsave\n");
     fprintf(stderr,
@@ -82,7 +82,7 @@ static void psprintpointf(pointf p)
 }
 #endif
 
-static void psprintspline(Ppolyline_t spl)
+void psprintspline(Ppolyline_t spl)
 {
     int i;
 
@@ -98,7 +98,7 @@ static void psprintspline(Ppolyline_t spl)
     show_boxes_append(&Show_boxes, gv_strdup("stroke grestore"));
 }
 
-static void psprintline(Ppolyline_t pl)
+void psprintline(Ppolyline_t pl)
 {
     int i;
 
@@ -114,7 +114,7 @@ static void psprintline(Ppolyline_t pl)
     show_boxes_append(&Show_boxes, gv_strdup("stroke grestore"));
 }
 
-static void psprintpoly(Ppoly_t p)
+void psprintpoly(Ppoly_t p)
 {
     point tl, hd;
     int bi;
@@ -136,7 +136,7 @@ static void psprintpoly(Ppoly_t p)
     show_boxes_append(&Show_boxes, gv_strdup("grestore"));
 }
 
-static void psprintboxes(int boxn, boxf* boxes)
+void psprintboxes(int boxn, boxf* boxes)
 {
     pointf ll, ur;
     int bi;
@@ -159,7 +159,7 @@ static void psprintboxes(int boxn, boxf* boxes)
     show_boxes_append(&Show_boxes, gv_strdup("grestore"));
 }
 
-static void psprintinit (int begin)
+void psprintinit (int begin)
 {
     if (begin)
 	show_boxes_append(&Show_boxes, gv_strdup("dbgstart"));
@@ -167,7 +167,7 @@ static void psprintinit (int begin)
 	show_boxes_append(&Show_boxes, gv_strdup("grestore"));
 }
 
-static bool debugleveln(edge_t* realedge, int i)
+bool debugleveln(edge_t* realedge, int i)
 {
     return GD_showboxes(agraphof(aghead(realedge))) == i ||
 	    GD_showboxes(agraphof(agtail(realedge))) == i ||
@@ -254,7 +254,7 @@ void routesplinesterm(void)
 		nedges, nboxes, elapsed_sec());
 }
 
-static void
+void
 limitBoxes (boxf* boxes, int boxn, const pointf *pps, int pn, int delta)
 {
     int bi, si, splinepi;
@@ -316,7 +316,7 @@ limitBoxes (boxf* boxes, int boxn, const pointf *pps, int pn, int delta)
  *
  * If a catastrophic error, return NULL and npoints is 0.
  */
-static pointf *_routesplines(path * pp, int *npoints, int polyline)
+pointf *_routesplines(path * pp, int *npoints, int polyline)
 {
     Ppoly_t poly;
     Ppolyline_t pl, spl;
@@ -589,7 +589,7 @@ pointf *routepolylines(path * pp, int *npoints)
     return _routesplines (pp, npoints, 1);
 }
 
-static double overlap(double i0, double i1, double j0, double j1) {
+double overlap(double i0, double i1, double j0, double j1) {
   if (i1 <= j0)
     return 0;
   if (i0 >= j1)
@@ -618,7 +618,7 @@ static double overlap(double i0, double i1, double j0, double j1) {
  *
  * Return 1 on failure; 0 on success.
  */
-static int checkpath(int boxn, boxf* boxes, path* thepath)
+int checkpath(int boxn, boxf* boxes, path* thepath)
 {
     boxf *ba, *bb;
     int bi, i, errs, l, r, d, u;
@@ -749,7 +749,7 @@ static int checkpath(int boxn, boxf* boxes, path* thepath)
     return 0;
 }
 
-static void printpath(path * pp)
+void printpath(path * pp)
 {
     int bi;
 
@@ -766,7 +766,7 @@ static void printpath(path * pp)
 	    pp->end.constrained ? "constrained" : "not constrained");
 }
 
-static pointf get_centroid(Agraph_t *g)
+pointf get_centroid(Agraph_t *g)
 {
     pointf sum = {0.0, 0.0};
 
@@ -783,7 +783,7 @@ typedef struct _tag_vec
     size_t _capelems;
 } vec;
 
-static vec* vec_new(void)
+vec* vec_new(void)
 {
     vec* pvec = malloc(sizeof(vec));
     pvec->_capelems = 10;
@@ -792,32 +792,32 @@ static vec* vec_new(void)
     return pvec;
 }
 
-static size_t vec_length(const vec* pvec)
+size_t vec_length(const vec* pvec)
 {
     return pvec->_elems;
 }
 
-static void* vec_get(vec* pvec, size_t index)
+void* vec_get(vec* pvec, size_t index)
 {
     assert(index < pvec->_elems);
     return pvec->_mem[index];
 }
 
-static void vec_delete(vec* pvec)
+void vec_delete(vec* pvec)
 {
     free(pvec->_mem);
     free(pvec);
 }
 
 // cycles is assumed to be a vec of vec of nodes.
-static void cycles_delete(vec* cycles) {
+void cycles_delete(vec* cycles) {
   for (size_t i = 0; i < vec_length(cycles); ++i) {
     vec_delete(vec_get(cycles, i));
   }
   vec_delete(cycles);
 }
 
-static void vec_push_back(vec* pvec, void* data)
+void vec_push_back(vec* pvec, void* data)
 {
     if (pvec->_elems == pvec->_capelems) {
 		pvec->_capelems += 10;
@@ -826,14 +826,14 @@ static void vec_push_back(vec* pvec, void* data)
     pvec->_mem[pvec->_elems++] = data;  
 }
 
-static void* vec_pop(vec* pvec)
+void* vec_pop(vec* pvec)
 {
 	if (pvec->_elems > 0)
 		return pvec->_mem[--pvec->_elems];
 	return NULL;
 }
 
-static bool vec_contains(vec* pvec, void* item)
+bool vec_contains(vec* pvec, void* item)
 {
 	for (size_t i=0; i < pvec->_elems; ++i) {
 		if (pvec->_mem[i] == item)
@@ -843,7 +843,7 @@ static bool vec_contains(vec* pvec, void* item)
 	return false;
 }
 
-static vec* vec_copy(vec* pvec)
+vec* vec_copy(vec* pvec)
 {
     vec* nvec = malloc(sizeof(vec));
     nvec->_capelems = pvec->_capelems;
@@ -854,7 +854,7 @@ static vec* vec_copy(vec* pvec)
 }
 //end generic vector structure
 
-static bool cycle_contains_edge(vec* cycle, edge_t* edge)
+bool cycle_contains_edge(vec* cycle, edge_t* edge)
 {
 	node_t* start = agtail(edge);
 	node_t* end = aghead(edge);
@@ -880,7 +880,7 @@ static bool cycle_contains_edge(vec* cycle, edge_t* edge)
 	return false;
 }
 
-static bool is_cycle_unique(vec* cycles, vec* cycle)
+bool is_cycle_unique(vec* cycles, vec* cycle)
 {
 	size_t cycle_len = vec_length(cycle);
 	size_t n_cycles = vec_length(cycles);
@@ -914,7 +914,7 @@ static bool is_cycle_unique(vec* cycles, vec* cycle)
 	return true;
 }
 
-static void dfs(graph_t *g, node_t* search, vec* visited, node_t* end, vec* cycles)
+void rspl_dfs(graph_t *g, node_t* search, vec* visited, node_t* end, vec* cycles)
 {
 	edge_t* e;
 	node_t* n;
@@ -930,14 +930,14 @@ static void dfs(graph_t *g, node_t* search, vec* visited, node_t* end, vec* cycl
 		vec_push_back(visited, search);
 		for (e = agfstout(g, search); e; e = agnxtout(g, e)) {
 			n = aghead(e);
-			dfs(g, n, visited, end, cycles);
+			rspl_dfs(g, n, visited, end, cycles);
 		}
 		vec_pop(visited);
 	}
 }
 
 // Returns a vec of vec of nodes (aka a vector of cycles), which must be freed using cycles_delete.
-static vec* find_all_cycles(graph_t *g)
+vec* find_all_cycles(graph_t *g)
 {
     node_t *n;
 
@@ -949,14 +949,14 @@ static vec* find_all_cycles(graph_t *g)
 		cycle = vec_new();
 		vec_push_back(alloced_cycles, cycle); //keep track of all items we allocate to clean up at the end of this function
 		
-		dfs(g, n, cycle, n, cycles);
+		rspl_dfs(g, n, cycle, n, cycles);
 	}
 	
 	cycles_delete(alloced_cycles); //cycles contains copied vecs
     return cycles;
 }
 
-static vec* find_shortest_cycle_with_edge(vec* cycles, edge_t* edge, size_t min_size)
+vec* find_shortest_cycle_with_edge(vec* cycles, edge_t* edge, size_t min_size)
 {
 	size_t c; //cycle counter
 	size_t cycles_len = vec_length(cycles);
@@ -980,7 +980,7 @@ static vec* find_shortest_cycle_with_edge(vec* cycles, edge_t* edge, size_t min_
 	return shortest;
 }
 
-static pointf get_cycle_centroid(graph_t *g, edge_t* edge)
+pointf get_cycle_centroid(graph_t *g, edge_t* edge)
 {
 	vec* cycles = find_all_cycles(g);
 
@@ -1016,7 +1016,7 @@ static pointf get_cycle_centroid(graph_t *g, edge_t* edge)
     return sum;
 }
 
-static void bend(pointf spl[4], pointf centroid)
+void bend(pointf spl[4], pointf centroid)
 {
     pointf  a;
     double  r;

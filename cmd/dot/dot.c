@@ -30,6 +30,8 @@
 #include <stdlib.h>
 #include <time.h>
 
+#include <instrument.h>
+
 static GVC_t *Gvc;
 static graph_t * G;
 
@@ -46,6 +48,9 @@ static void fperr(int s)
 
 int main(int argc, char **argv)
 {
+    init_profile("profile.spall");
+    init_thread(0, 10 * 1024 * 1024, 1000);
+
     graph_t *prev = NULL;
     int r, rc = 0;
 
@@ -82,6 +87,10 @@ int main(int argc, char **argv)
     }
     gvFinalize(Gvc);
     r = gvFreeContext(Gvc);
+
+    exit_thread();
+    exit_profile();
+    
     graphviz_exit(MAX(rc,r));
 }
 

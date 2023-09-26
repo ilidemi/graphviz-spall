@@ -19,7 +19,7 @@
 #define		UP		0
 #define		DOWN	1
 
-static bool samedir(edge_t * e, edge_t * f)
+bool samedir(edge_t * e, edge_t * f)
 {
     edge_t *e0, *f0;
 
@@ -37,13 +37,13 @@ static bool samedir(edge_t * e, edge_t * f)
 	    * (ND_rank(agtail(e0)) - ND_rank(aghead(e0))) > 0);
 }
 
-static bool downcandidate(node_t * v)
+bool downcandidate(node_t * v)
 {
     return ND_node_type(v) == VIRTUAL && ND_in(v).size == 1
 	    && ND_out(v).size == 1 && ND_label(v) == NULL;
 }
 
-static bool bothdowncandidates(node_t * u, node_t * v)
+bool bothdowncandidates(node_t * u, node_t * v)
 {
     edge_t *e, *f;
     e = ND_in(u).list[0];
@@ -55,13 +55,13 @@ static bool bothdowncandidates(node_t * u, node_t * v)
     return false;
 }
 
-static bool upcandidate(node_t * v)
+bool upcandidate(node_t * v)
 {
     return ND_node_type(v) == VIRTUAL && ND_out(v).size == 1
 	    && ND_in(v).size == 1 && ND_label(v) == NULL;
 }
 
-static bool bothupcandidates(node_t * u, node_t * v)
+bool bothupcandidates(node_t * u, node_t * v)
 {
     edge_t *e, *f;
     e = ND_out(u).list[0];
@@ -73,7 +73,7 @@ static bool bothupcandidates(node_t * u, node_t * v)
     return false;
 }
 
-static void mergevirtual(graph_t * g, int r, int lpos, int rpos, int dir)
+void mergevirtual(graph_t * g, int r, int lpos, int rpos, int dir)
 {
     int i, k;
     node_t *left, *right;
@@ -127,7 +127,7 @@ static void mergevirtual(graph_t * g, int r, int lpos, int rpos, int dir)
     GD_rank(g)[r].v[k] = NULL;
 }
 
-static void infuse(graph_t * g, node_t * n)
+void infuse(graph_t * g, node_t * n)
 {
     node_t *lead;
 
@@ -136,7 +136,7 @@ static void infuse(graph_t * g, node_t * n)
 	GD_rankleader(g)[ND_rank(n)] = n;
 }
 
-static int rebuild_vlists(graph_t * g)
+int rebuild_vlists(graph_t * g)
 {
     int c, i, r, maxi;
     node_t *n, *lead;

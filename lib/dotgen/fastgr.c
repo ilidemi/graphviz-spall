@@ -18,7 +18,7 @@
  * operations on the fast internal graph.
  */
 
-static edge_t *ffe(node_t * u, elist uL, node_t * v, elist vL)
+edge_t *ffe(node_t * u, elist uL, node_t * v, elist vL)
 {
     int i;
     edge_t *e;
@@ -43,7 +43,7 @@ edge_t *find_fast_edge(node_t * u, node_t * v)
     return ffe(u, ND_out(u), v, ND_in(v));
 }
 
-static UNUSED node_t *find_fast_node(graph_t *g, node_t *n) {
+UNUSED node_t *find_fast_node(graph_t *g, node_t *n) {
     node_t *v;
     for (v = GD_nlist(g); v; v = ND_next(v))
 	if (v == n)
@@ -57,7 +57,7 @@ edge_t *find_flat_edge(node_t * u, node_t * v)
 }
 
 /* safe_list_append - append e to list L only if e not already a member */
-static void 
+void 
 safe_list_append(edge_t * e, elist * L)
 {
     for (size_t i = 0; i < L->size; i++)
@@ -199,7 +199,7 @@ void delete_fast_node(graph_t * g, node_t * n)
 	GD_nlist(g) = ND_next(n);
 }
 
-static node_t *named_virtual_node(graph_t * g, char *s)
+node_t *named_virtual_node(graph_t * g, char *s)
 {
     node_t *n = gv_alloc(sizeof(node_t));
     AGTYPE(n) = AGNODE;
@@ -282,7 +282,7 @@ void fastgr(graph_t * g)
 }
 #endif
 
-static void 
+void 
 basic_merge(edge_t * e, edge_t * rep)
 {
     if (ED_minlen(rep) < ED_minlen(e))

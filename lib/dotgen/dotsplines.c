@@ -66,31 +66,31 @@ typedef struct {
 
 DEFINE_LIST(points, pointf)
 
-static void adjustregularpath(path *, int, int);
-static Agedge_t *bot_bound(Agedge_t *, int);
-static bool pathscross(Agnode_t *, Agnode_t *, Agedge_t *, Agedge_t *);
-static Agraph_t *cl_bound(graph_t*, Agnode_t *, Agnode_t *);
-static bool cl_vninside(Agraph_t *, Agnode_t *);
-static void completeregularpath(path *, Agedge_t *, Agedge_t *,
+void adjustregularpath(path *, int, int);
+Agedge_t *bot_bound(Agedge_t *, int);
+bool pathscross(Agnode_t *, Agnode_t *, Agedge_t *, Agedge_t *);
+Agraph_t *cl_bound(graph_t*, Agnode_t *, Agnode_t *);
+bool cl_vninside(Agraph_t *, Agnode_t *);
+void completeregularpath(path *, Agedge_t *, Agedge_t *,
 				pathend_t *, pathend_t *, boxf *, int, int);
-static int edgecmp(Agedge_t **, Agedge_t **);
-static void make_flat_edge(graph_t*, spline_info_t*, path *, Agedge_t **, int, int, int);
-static void make_regular_edge(graph_t* g, spline_info_t*, path *, Agedge_t **, int, int, int);
-static boxf makeregularend(boxf, int, double);
-static boxf maximal_bbox(graph_t* g, spline_info_t*, Agnode_t *, Agedge_t *, Agedge_t *);
-static Agnode_t *neighbor(graph_t*, Agnode_t *, Agedge_t *, Agedge_t *, int);
-static void place_vnlabel(Agnode_t *);
-static boxf rank_box(spline_info_t* sp, Agraph_t *, int);
-static void recover_slack(Agedge_t *, path *);
-static void resize_vn(Agnode_t *, int, int, int);
-static void setflags(Agedge_t *, int, int, int);
-static int straight_len(Agnode_t *);
-static Agedge_t *straight_path(Agedge_t*, int, points_t*);
-static Agedge_t *top_bound(Agedge_t *, int);
+int edgecmp(Agedge_t **, Agedge_t **);
+void make_flat_edge(graph_t*, spline_info_t*, path *, Agedge_t **, int, int, int);
+void make_regular_edge(graph_t* g, spline_info_t*, path *, Agedge_t **, int, int, int);
+boxf makeregularend(boxf, int, double);
+boxf maximal_bbox(graph_t* g, spline_info_t*, Agnode_t *, Agedge_t *, Agedge_t *);
+Agnode_t *spl_neighbor(graph_t*, Agnode_t *, Agedge_t *, Agedge_t *, int);
+void place_vnlabel(Agnode_t *);
+boxf rank_box(spline_info_t* sp, Agraph_t *, int);
+void recover_slack(Agedge_t *, path *);
+void resize_vn(Agnode_t *, int, int, int);
+void setflags(Agedge_t *, int, int, int);
+int straight_len(Agnode_t *);
+Agedge_t *straight_path(Agedge_t*, int, points_t*);
+Agedge_t *top_bound(Agedge_t *, int);
 
 #define GROWEDGES (edges = ALLOC (n_edges + CHUNK, edges, edge_t*))
 
-static edge_t*
+edge_t*
 getmainedge(edge_t * e)
 {
     edge_t *le = e;
@@ -101,13 +101,13 @@ getmainedge(edge_t * e)
     return le;
 }
 
-static bool spline_merge(node_t * n)
+bool spline_merge(node_t * n)
 {
     return ND_node_type(n) == VIRTUAL
 	    && (ND_in(n).size > 1 || ND_out(n).size > 1);
 }
 
-static bool swap_ends_p(edge_t * e)
+bool swap_ends_p(edge_t * e)
 {
     while (ED_to_orig(e))
 	e = ED_to_orig(e);
@@ -120,7 +120,7 @@ static bool swap_ends_p(edge_t * e)
     return true;
 }
 
-static splineInfo sinfo = {.swapEnds = swap_ends_p,
+splineInfo sinfo = {.swapEnds = swap_ends_p,
                            .splineMerge = spline_merge};
 
 int portcmp(port p0, port p1)
@@ -140,7 +140,7 @@ int portcmp(port p0, port p1)
     return 0;
 }
 
-static void swap_bezier(bezier *b) {
+void swap_bezier(bezier *b) {
   int sz = b->size;
   for (int i = 0; i < sz / 2; ++i) { // reverse list of points
     pointf tmp = b->list[i];
@@ -160,7 +160,7 @@ static void swap_bezier(bezier *b) {
   }
 }
 
-static void swap_spline(splines * s)
+void swap_spline(splines * s)
 {
   int sz = s->size;
 
@@ -183,7 +183,7 @@ static void swap_spline(splines * s)
  * the order of control points always goes from tail to head, so
  * we reverse them if necessary.
  */
-static void edge_normalize(graph_t * g)
+void edge_normalize(graph_t * g)
 {
     edge_t *e;
     node_t *n;
@@ -202,7 +202,7 @@ static void edge_normalize(graph_t * g)
  * reflect the loops and associated labels. We restore
  * the original value here. 
  */
-static void
+void
 resetRW (graph_t * g)
 {
     node_t* n;
@@ -221,7 +221,7 @@ resetRW (graph_t * g)
  * Dot has allocated space and position for these labels. This info will be
  * used when routing orthogonal edges.
  */
-static void
+void
 setEdgeLabelPos (graph_t * g)
 {
     node_t* n;
@@ -252,7 +252,7 @@ setEdgeLabelPos (graph_t * g)
  * so that the edge will only be normalized once in the top level call
  * of dot_splines.
  */
-static void _dot_splines(graph_t * g, int normalize)
+void _dot_splines(graph_t * g, int normalize)
 {
     int i, j, k, n_nodes, n_edges, ind, cnt;
     node_t *n;
@@ -519,7 +519,7 @@ void dot_splines(graph_t * g)
  * assign position of an edge label from its virtual node
  * This is for regular edges only.
  */
-static void 
+void 
 place_vnlabel(node_t * n)
 {
     pointf dimen;
@@ -536,7 +536,7 @@ place_vnlabel(node_t * n)
     ED_label(e)->set = true;
 }
 
-static void 
+void 
 setflags(edge_t *e, int hint1, int hint2, int f3)
 {
     int f1, f2;
@@ -577,7 +577,7 @@ setflags(edge_t *e, int hint1, int hint2, int f3)
  *  - labels if flat edges
  *  - edge id
  */
-static int edgecmp(edge_t** ptr0, edge_t** ptr1)
+int edgecmp(edge_t** ptr0, edge_t** ptr1)
 {
     Agedgeinfo_t fwdedgeai, fwdedgebi;
     Agedgepair_t fwdedgea, fwdedgeb;
@@ -717,7 +717,7 @@ typedef struct {
     int        State;
 } attr_state_t;
 
-static void
+void
 setState (graph_t* auxg, attr_state_t* attr_state)
 {
     /* save state */
@@ -810,7 +810,7 @@ setState (graph_t* auxg, attr_state_t* attr_state)
  * declares all node and edge attributes used in the original
  * graph.
  */
-static graph_t*
+graph_t*
 cloneGraph (graph_t* g, attr_state_t* attr_state)
 {
     Agsym_t* sym;
@@ -853,7 +853,7 @@ cloneGraph (graph_t* g, attr_state_t* attr_state)
     return auxg;
 }
 
-static void
+void
 cleanupCloneGraph (graph_t* g, attr_state_t* attr_state)
 {
     /* restore main graph syms */
@@ -905,7 +905,7 @@ cleanupCloneGraph (graph_t* g, attr_state_t* attr_state)
  * If original graph has rankdir=LR or RL, records change shape,
  * so we wrap a record node's label in "{...}" to prevent this.
  */
-static node_t *cloneNode(graph_t *g, node_t *orign) {
+node_t *cloneNode(graph_t *g, node_t *orign) {
     node_t* n = agnode(g, agnameof(orign),1);
     agbindrec(n, "Agnodeinfo_t", sizeof(Agnodeinfo_t), true);
     agcopyattr (orign, n);
@@ -919,7 +919,7 @@ static node_t *cloneNode(graph_t *g, node_t *orign) {
     return n;
 }
 
-static edge_t*
+edge_t*
 cloneEdge (graph_t* g, node_t* tn, node_t* hn, edge_t* orig)
 {
     edge_t* e = agedge(g, tn, hn,NULL,1);
@@ -932,7 +932,7 @@ cloneEdge (graph_t* g, node_t* tn, node_t* hn, edge_t* orig)
 /* transformf:
  * Rotate, if necessary, then translate points.
  */
-static pointf
+pointf
 transformf (pointf p, pointf del, int flip)
 {
     if (flip) {
@@ -949,7 +949,7 @@ transformf (pointf p, pointf del, int flip)
  *  - label is wider
  *  - label is higher
  */
-static int edgelblcmpfn(edge_t** ptr0, edge_t** ptr1)
+int edgelblcmpfn(edge_t** ptr0, edge_t** ptr1)
 {
     pointf sz0, sz1;
 
@@ -982,7 +982,7 @@ static int edgelblcmpfn(edge_t** ptr0, edge_t** ptr1)
  * to handle edges with ports. This usually works, but fails for
  * records because of their weird nature.
  */
-static void
+void
 makeSimpleFlatLabels (node_t* tn, node_t* hn, edge_t** edges, int ind, int cnt, int et, int n_lbls)
 {
     Ppoly_t poly;
@@ -1139,7 +1139,7 @@ makeSimpleFlatLabels (node_t* tn, node_t* hn, edge_t** edges, int ind, int cnt, 
     free (earray);
 }
 
-static void
+void
 makeSimpleFlat (node_t* tn, node_t* hn, edge_t** edges, int ind, int cnt, int et)
 {
     edge_t* e = edges[ind];
@@ -1188,7 +1188,7 @@ makeSimpleFlat (node_t* tn, node_t* hn, edge_t** edges, int ind, int cnt, int et
  * This is probably to cute and fragile, and should be rewritten in a 
  * more straightforward and laborious fashion. 
  */
-static void
+void
 make_flat_adj_edges(graph_t* g, edge_t** edges, int ind, int cnt, edge_t* e0,
                     int et)
 {
@@ -1339,7 +1339,7 @@ make_flat_adj_edges(graph_t* g, edge_t** edges, int ind, int cnt, edge_t* e0,
     cleanupCloneGraph(auxg, &attrs);
 }
 
-static void
+void
 makeFlatEnd (graph_t* g, spline_info_t* sp, path* P, node_t* n, edge_t* e, pathend_t* endp,
              bool isBegin)
 {
@@ -1356,7 +1356,7 @@ makeFlatEnd (graph_t* g, spline_info_t* sp, path* P, node_t* n, edge_t* e, pathe
 	endp->boxes[endp->boxn++] = b;
 }
 
-static void
+void
 makeBottomFlatEnd (graph_t* g, spline_info_t* sp, path* P, node_t* n, edge_t* e, 
 	pathend_t* endp, bool isBegin)
 {
@@ -1373,7 +1373,7 @@ makeBottomFlatEnd (graph_t* g, spline_info_t* sp, path* P, node_t* n, edge_t* e,
 	endp->boxes[endp->boxn++] = b;
 }
 
-static void
+void
 make_flat_labeled_edge(graph_t* g, spline_info_t* sp, path* P, edge_t* e, int et)
 {
     node_t *tn, *hn, *ln;
@@ -1447,7 +1447,7 @@ make_flat_labeled_edge(graph_t* g, spline_info_t* sp, path* P, edge_t* e, int et
 	free(ps);
 }
 
-static void
+void
 make_flat_bottom_edges(graph_t* g, spline_info_t* sp, path * P, edge_t ** edges, int 
 	ind, int cnt, edge_t* e, bool use_splines)
 {
@@ -1527,7 +1527,7 @@ make_flat_bottom_edges(graph_t* g, spline_info_t* sp, path * P, edge_t ** edges,
  *     = connecting bottom to bottom/left/right - route along bottom
  *     = the rest - route along top
  */
-static void
+void
 make_flat_edge(graph_t* g, spline_info_t* sp, path * P, edge_t ** edges, int ind, int cnt, int et)
 {
     node_t *tn, *hn;
@@ -1644,7 +1644,7 @@ make_flat_edge(graph_t* g, spline_info_t* sp, path * P, edge_t ** edges, int ind
 }
 
 /// Return true if p3 is to left of ray p1->p2
-static bool leftOf(pointf p1, pointf p2, pointf p3) {
+bool spl_leftOf(pointf p1, pointf p2, pointf p3) {
   return (p1.y - p2.y) * (p3.x - p2.x) - (p3.y - p2.y) * (p1.x - p2.x) > 0;
 }
 
@@ -1663,7 +1663,7 @@ static bool leftOf(pointf p1, pointf p2, pointf p3) {
  * This is done because the usual code handles the interaction of
  * multiple edges better.
  */
-static int makeLineEdge(graph_t *g, edge_t *fe, points_t *points, node_t** hp) {
+int makeLineEdge(graph_t *g, edge_t *fe, points_t *points, node_t** hp) {
     int delr, pn;
     node_t* hn;
     node_t* tn;
@@ -1702,7 +1702,7 @@ static int makeLineEdge(graph_t *g, edge_t *fe, points_t *points, node_t** hp) {
 	}
 
 	lp = ED_label(e)->pos;
-	if (leftOf (endp,startp,lp)) {
+	if (spl_leftOf (endp,startp,lp)) {
 	    lp.x += width/2.0;
 	    lp.y -= height/2.0;
 	}    
@@ -1731,7 +1731,7 @@ static int makeLineEdge(graph_t *g, edge_t *fe, points_t *points, node_t** hp) {
     return pn;
 }
 
-static void
+void
 make_regular_edge(graph_t* g, spline_info_t* sp, path * P, edge_t ** edges, int ind, int cnt, int et)
 {
     node_t *tn, *hn;
@@ -1951,7 +1951,7 @@ make_regular_edge(graph_t* g, spline_info_t* sp, path * P, edge_t ** edges, int 
 
 #define DONT_WANT_ANY_ENDPOINT_PATH_REFINEMENT
 #ifdef DONT_WANT_ANY_ENDPOINT_PATH_REFINEMENT
-static void
+void
 completeregularpath(path * P, edge_t * first, edge_t * last,
 		    pathend_t * tendp, pathend_t * hendp, boxf * boxes,
 		    int boxn, int flag)
@@ -1995,7 +1995,7 @@ void refineregularends(edge_t * left, edge_t * right, pathend_t * endp,
 		       int dir, boxf b, boxf * boxes, int *boxnp);
 
 /* box subdivision is obsolete, I think... ek */
-static void
+void
 completeregularpath(path * P, edge_t * first, edge_t * last,
 		    pathend_t * tendp, pathend_t * hendp, boxf * boxes,
 		    int boxn, int flag)
@@ -2064,7 +2064,7 @@ completeregularpath(path * P, edge_t * first, edge_t * last,
  * nodes in a given rank can differ in height.
  * for now, regular edges always go from top to bottom 
  */
-static boxf makeregularend(boxf b, int side, double y)
+boxf makeregularend(boxf b, int side, double y)
 {
   assert(side == BOTTOM || side == TOP);
   if (side == BOTTOM) {
@@ -2178,7 +2178,7 @@ void refineregularends(edge_t *left, edge_t *right, pathend_t *endp, int dir,
  * to guarantee an overlap between adjacent boxes of at least MINW.
  * It doesn't do this.
  */
-static void adjustregularpath(path * P, int fb, int lb)
+void adjustregularpath(path * P, int fb, int lb)
 {
     boxf *bp1, *bp2;
     int i;
@@ -2215,7 +2215,7 @@ static void adjustregularpath(path * P, int fb, int lb)
     }
 }
 
-static boxf rank_box(spline_info_t* sp, graph_t * g, int r)
+boxf rank_box(spline_info_t* sp, graph_t * g, int r)
 {
     boxf b;
     node_t *left0, *left1;
@@ -2234,7 +2234,7 @@ static boxf rank_box(spline_info_t* sp, graph_t * g, int r)
 }
 
 /* returns count of vertically aligned edges starting at n */
-static int straight_len(node_t * n)
+int straight_len(node_t * n)
 {
     int cnt = 0;
     node_t *v;
@@ -2253,7 +2253,7 @@ static int straight_len(node_t * n)
     return cnt;
 }
 
-static edge_t *straight_path(edge_t *e, int cnt, points_t *plist) {
+edge_t *straight_path(edge_t *e, int cnt, points_t *plist) {
     edge_t *f = e;
 
     while (cnt--)
@@ -2265,7 +2265,7 @@ static edge_t *straight_path(edge_t *e, int cnt, points_t *plist) {
     return f;
 }
 
-static void recover_slack(edge_t * e, path * p)
+void recover_slack(edge_t * e, path * p)
 {
     int b;
     node_t *vn;
@@ -2290,14 +2290,14 @@ static void recover_slack(edge_t * e, path * p)
     }
 }
 
-static void resize_vn(node_t *vn, int lx, int cx, int rx)
+void resize_vn(node_t *vn, int lx, int cx, int rx)
 {
     ND_coord(vn).x = cx;
     ND_lw(vn) = cx - lx, ND_rw(vn) = rx - cx;
 }
 
 /* side > 0 means right. side < 0 means left */
-static edge_t *top_bound(edge_t * e, int side)
+edge_t *top_bound(edge_t * e, int side)
 {
     edge_t *f, *ans = NULL;
     int i;
@@ -2315,7 +2315,7 @@ static edge_t *top_bound(edge_t * e, int side)
     return ans;
 }
 
-static edge_t *bot_bound(edge_t * e, int side)
+edge_t *bot_bound(edge_t * e, int side)
 {
     edge_t *f, *ans = NULL;
     int i;
@@ -2335,7 +2335,7 @@ static edge_t *bot_bound(edge_t * e, int side)
 
 /* common routines */
 
-static bool cl_vninside(graph_t *cl, node_t *n) {
+bool cl_vninside(graph_t *cl, node_t *n) {
   return BETWEEN(GD_bb(cl).LL.x, ND_coord(n).x, GD_bb(cl).UR.x) &&
          BETWEEN(GD_bb(cl).LL.y, ND_coord(n).y, GD_bb(cl).UR.y);
 }
@@ -2349,7 +2349,7 @@ static bool cl_vninside(graph_t *cl, node_t *n) {
 
 /* returns the cluster of (adj) that interferes with n,
  */
-static Agraph_t *cl_bound(graph_t* g,  node_t *n, node_t *adj)
+Agraph_t *cl_bound(graph_t* g,  node_t *n, node_t *adj)
 {
     graph_t *rv, *cl, *tcl, *hcl;
     edge_t *orig;
@@ -2390,7 +2390,7 @@ static Agraph_t *cl_bound(graph_t* g,  node_t *n, node_t *adj)
  */
 #define FUDGE 4
 
-static boxf maximal_bbox(graph_t* g, spline_info_t* sp, node_t* vn, edge_t* ie, edge_t* oe)
+boxf maximal_bbox(graph_t* g, spline_info_t* sp, node_t* vn, edge_t* ie, edge_t* oe)
 {
     double b, nb;
     graph_t *left_cl, *right_cl;
@@ -2401,7 +2401,7 @@ static boxf maximal_bbox(graph_t* g, spline_info_t* sp, node_t* vn, edge_t* ie, 
 
     /* give this node all the available space up to its neighbors */
     b = (double)(ND_coord(vn).x - ND_lw(vn) - FUDGE);
-    if ((left = neighbor(g, vn, ie, oe, -1))) {
+    if ((left = spl_neighbor(g, vn, ie, oe, -1))) {
 	if ((left_cl = cl_bound(g, vn, left)))
 	    nb = GD_bb(left_cl).UR.x + (double)sp->Splinesep;
 	else {
@@ -2422,7 +2422,7 @@ static boxf maximal_bbox(graph_t* g, spline_info_t* sp, node_t* vn, edge_t* ie, 
 	b = (double)(ND_coord(vn).x + 10);
     else
 	b = (double)(ND_coord(vn).x + ND_rw(vn) + FUDGE);
-    if ((right = neighbor(g, vn, ie, oe, 1))) {
+    if ((right = spl_neighbor(g, vn, ie, oe, 1))) {
 	if ((right_cl = cl_bound(g, vn, right)))
 	    nb = GD_bb(right_cl).LL.x - (double)sp->Splinesep;
 	else {
@@ -2448,8 +2448,8 @@ static boxf maximal_bbox(graph_t* g, spline_info_t* sp, node_t* vn, edge_t* ie, 
     return rv;
 }
 
-static node_t *
-neighbor(graph_t* g, node_t *vn, edge_t *ie, edge_t *oe, int dir)
+node_t *
+spl_neighbor(graph_t* g, node_t *vn, edge_t *ie, edge_t *oe, int dir)
 {
     int i;
     node_t *n, *rv = NULL;
@@ -2473,7 +2473,7 @@ neighbor(graph_t* g, node_t *vn, edge_t *ie, edge_t *oe, int dir)
     return rv;
 }
 
-static bool pathscross(node_t *n0, node_t *n1, edge_t *ie1, edge_t *oe1)
+bool pathscross(node_t *n0, node_t *n1, edge_t *ie1, edge_t *oe1)
 {
     edge_t *e0, *e1;
     node_t *na, *nb;

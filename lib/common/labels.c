@@ -18,7 +18,7 @@
 
 static char *strdup_and_subst_obj0 (char *str, void *obj, int escBackslash);
 
-static void storeline(GVC_t *gvc, textlabel_t *lp, char *line,
+void storeline(GVC_t *gvc, textlabel_t *lp, char *line,
                       char terminator) {
     pointf size;
     textspan_t *span;

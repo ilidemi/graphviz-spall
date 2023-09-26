@@ -25,19 +25,19 @@
 #include <stdbool.h>
 #include <stdlib.h>
 
-static int nsiter2(graph_t * g);
-static void create_aux_edges(graph_t * g);
-static void remove_aux_edges(graph_t * g);
-static void set_xcoords(graph_t * g);
-static void set_ycoords(graph_t * g);
-static void set_aspect(graph_t * g, aspect_t* );
-static void expand_leaves(graph_t * g);
-static void make_lrvn(graph_t * g);
-static void contain_nodes(graph_t * g);
-static bool idealsize(graph_t * g, double);
+int nsiter2(graph_t * g);
+void create_aux_edges(graph_t * g);
+void remove_aux_edges(graph_t * g);
+void set_xcoords(graph_t * g);
+void set_ycoords(graph_t * g);
+void set_aspect(graph_t * g, aspect_t* );
+void expand_leaves(graph_t * g);
+void make_lrvn(graph_t * g);
+void contain_nodes(graph_t * g);
+bool idealsize(graph_t * g, double);
 
 #if defined(DEBUG) && DEBUG > 1
-static void
+void
 dumpNS (graph_t * g)
 {
     node_t* n = GD_nlist(g);
@@ -57,7 +57,7 @@ dumpNS (graph_t * g)
 }
 #endif
 
-static double
+double
 largeMinlen (double l)
 {
   agerr(AGERR,
@@ -73,7 +73,7 @@ largeMinlen (double l)
  * 3 components. To fix this, we put trivial constraints connecting the
  * first items of each rank.
  */
-static void
+void
 connectGraph (graph_t* g)
 {
     int i, j, r;
@@ -147,7 +147,7 @@ void dot_position(graph_t * g, aspect_t* asp)
 				 */
 }
 
-static int nsiter2(graph_t * g)
+int nsiter2(graph_t * g)
 {
     int maxiter = INT_MAX;
     char *s;
@@ -157,7 +157,7 @@ static int nsiter2(graph_t * g)
     return maxiter;
 }
 
-static bool go(node_t *u, node_t *v) {
+bool go(node_t *u, node_t *v) {
     int i;
     edge_t *e;
 
@@ -170,7 +170,7 @@ static bool go(node_t *u, node_t *v) {
     return false;
 }
 
-static bool canreach(node_t *u, node_t *v) {
+bool canreach(node_t *u, node_t *v) {
     return go(u, v);
 }
 
@@ -194,7 +194,7 @@ edge_t *make_aux_edge(node_t * u, node_t * v, double len, int wt)
     return e;
 }
 
-static void allocate_aux_edges(graph_t * g)
+void allocate_aux_edges(graph_t * g)
 {
     int i, j, n_in;
     node_t *n;
@@ -213,7 +213,7 @@ static void allocate_aux_edges(graph_t * g)
 
 /* make_LR_constraints:
  */
-static void 
+void 
 make_LR_constraints(graph_t * g)
 {
     int i, j;
@@ -325,7 +325,7 @@ make_LR_constraints(graph_t * g)
 }
 
 /* make_edge_pairs: make virtual edge pairs corresponding to input edges */
-static void make_edge_pairs(graph_t * g)
+void make_edge_pairs(graph_t * g)
 {
     int i, m0, m1;
     node_t *n, *sn;
@@ -352,7 +352,7 @@ static void make_edge_pairs(graph_t * g)
     }
 }
 
-static void contain_clustnodes(graph_t * g)
+void contain_clustnodes(graph_t * g)
 {
     int c;
     edge_t	*e;
@@ -368,7 +368,7 @@ static void contain_clustnodes(graph_t * g)
 	contain_clustnodes(GD_clust(g)[c]);
 }
 
-static bool vnode_not_related_to(graph_t *g, node_t *v) {
+bool vnode_not_related_to(graph_t *g, node_t *v) {
     edge_t *e;
 
     if (ND_node_type(v) != VIRTUAL)
@@ -391,7 +391,7 @@ static bool vnode_not_related_to(graph_t *g, node_t *v) {
  * separate between clusters. Also, we should be able to skip the
  * first loop if g is the root graph.
  */
-static void keepout_othernodes(graph_t * g)
+void keepout_othernodes(graph_t * g)
 {
     int i, c, r, margin;
     node_t *u, *v;
@@ -431,7 +431,7 @@ static void keepout_othernodes(graph_t * g)
  * right bounding box nodes ln and rn of g and a subcluster.
  * The gap needs to include any left or right labels.
  */
-static void contain_subclust(graph_t * g)
+void contain_subclust(graph_t * g)
 {
     int margin, c;
     graph_t *subg;
@@ -455,7 +455,7 @@ static void contain_subclust(graph_t * g)
  * of the left cluster and the left bbox node ln of the right cluster.
  * This is only done if the two clusters overlap in some rank.
  */
-static void separate_subclust(graph_t * g)
+void separate_subclust(graph_t * g)
 {
     int i, j, margin;
     graph_t *low, *high;
@@ -494,7 +494,7 @@ static void separate_subclust(graph_t * g)
  *	cluster containment in clusters,
  *	separation of sibling clusters.
  */
-static void pos_clusters(graph_t * g)
+void pos_clusters(graph_t * g)
 {
     if (GD_n_cluster(g) > 0) {
 	contain_clustnodes(g);
@@ -504,7 +504,7 @@ static void pos_clusters(graph_t * g)
     }
 }
 
-static void compress_graph(graph_t * g)
+void compress_graph(graph_t * g)
 {
     double x;
     pointf p;
@@ -528,7 +528,7 @@ static void compress_graph(graph_t * g)
     make_aux_edge(GD_ln(g), GD_rn(g), x, 1000);
 }
 
-static void create_aux_edges(graph_t * g)
+void create_aux_edges(graph_t * g)
 {
     allocate_aux_edges(g);
     make_LR_constraints(g);
@@ -537,7 +537,7 @@ static void create_aux_edges(graph_t * g)
     compress_graph(g);
 }
 
-static void remove_aux_edges(graph_t * g)
+void remove_aux_edges(graph_t * g)
 {
     int i;
     node_t *n, *nnext, *nprev;
@@ -573,7 +573,7 @@ static void remove_aux_edges(graph_t * g)
 /* set_xcoords:
  * Set x coords of nodes.
  */
-static void 
+void 
 set_xcoords(graph_t * g)
 {
     int i, j;
@@ -600,7 +600,7 @@ set_xcoords(graph_t * g)
  * FIX: There can be excess space between ranks. Not sure where this is
  * coming from but it could be cleaned up.
  */
-static void adjustSimple(graph_t * g, int delta, int margin_total)
+void adjustSimple(graph_t * g, int delta, int margin_total)
 {
     int r, bottom, deltop, delbottom;
     graph_t *root = dot_root(g);
@@ -635,7 +635,7 @@ static void adjustSimple(graph_t * g, int delta, int margin_total)
  * We divide the extra space between the top and bottom.
  * Adjust the ht1 and ht2 values in the process.
  */
-static void adjustRanks(graph_t * g, int margin_total)
+void adjustRanks(graph_t * g, int margin_total)
 {
     double lht;			/* label height */
     double rht;			/* height between top and bottom ranks */
@@ -688,7 +688,7 @@ static void adjustRanks(graph_t * g, int margin_total)
  * cluster nesting and labels.  also maintains global rank ht1 and ht2.
  * Return true if some cluster has a label.
  */
-static int clust_ht(Agraph_t * g)
+int clust_ht(Agraph_t * g)
 {
     int c;
     double ht1, ht2;
@@ -736,7 +736,7 @@ static int clust_ht(Agraph_t * g)
 }
 
 /* set y coordinates of nodes, a rank at a time */
-static void set_ycoords(graph_t * g)
+void set_ycoords(graph_t * g)
 {
     int i, j, r;
     double ht2, maxht, delta, d0, d1;
@@ -845,7 +845,7 @@ static void set_ycoords(graph_t * g)
  * For the root graph, we don't enforce all the constraints on lr and 
  * rn, so we traverse the nodes and subclusters.
  */
-static void dot_compute_bb(graph_t * g, graph_t * root)
+void dot_compute_bb(graph_t * g, graph_t * root)
 {
     int r, c;
     double x, offset;
@@ -892,7 +892,7 @@ static void dot_compute_bb(graph_t * g, graph_t * root)
     GD_bb(g).UR = UR;
 }
 
-static void rec_bb(graph_t * g, graph_t * root)
+void rec_bb(graph_t * g, graph_t * root)
 {
     int c;
     for (c = 1; c <= GD_n_cluster(g); c++)
@@ -904,7 +904,7 @@ static void rec_bb(graph_t * g, graph_t * root)
  * Recursively rescale all bounding boxes using scale factors
  * xf and yf. We assume all the bboxes have been computed.
  */
-static void scale_bb(graph_t * g, graph_t * root, double xf, double yf)
+void scale_bb(graph_t * g, graph_t * root, double xf, double yf)
 {
     int c;
 
@@ -918,7 +918,7 @@ static void scale_bb(graph_t * g, graph_t * root, double xf, double yf)
 
 /* adjustAspectRatio:
  */
-static void adjustAspectRatio (graph_t* g, aspect_t* asp)
+void adjustAspectRatio (graph_t* g, aspect_t* asp)
 {
     double AR = (GD_bb(g).UR.x - GD_bb(g).LL.x)/(GD_bb(g).UR.y - GD_bb(g).LL.y);
     if (Verbose) {
@@ -945,7 +945,7 @@ static void adjustAspectRatio (graph_t* g, aspect_t* asp)
  * Note that if some dimension shrinks, there may be problems
  * with labels.
  */
-static void set_aspect(graph_t * g, aspect_t* asp)
+void set_aspect(graph_t * g, aspect_t* asp)
 {
     double xf = 0.0, yf = 0.0, actual, desired;
     node_t *n;
@@ -1027,7 +1027,7 @@ static void set_aspect(graph_t * g, aspect_t* asp)
 }
 
 /* make space for the leaf nodes of each rank */
-static void make_leafslots(graph_t * g)
+void make_leafslots(graph_t * g)
 {
     int i, j, r;
     node_t *v;
@@ -1067,7 +1067,7 @@ int ports_eq(edge_t * e, edge_t * f)
 		|| !ED_tail_port(e).defined);
 }
 
-static void expand_leaves(graph_t * g)
+void expand_leaves(graph_t * g)
 {
     int i, d;
     node_t *n;
@@ -1105,7 +1105,7 @@ static void expand_leaves(graph_t * g)
  * if the label is wider than the cluster, the nodes in the
  * cluster may not be centered.
  */
-static void make_lrvn(graph_t * g)
+void make_lrvn(graph_t * g)
 {
     node_t *ln, *rn;
 
@@ -1129,7 +1129,7 @@ static void make_lrvn(graph_t * g)
  * make left and right bounding box virtual nodes ln and rn
  * constrain interior nodes
  */
-static void contain_nodes(graph_t * g)
+void contain_nodes(graph_t * g)
 {
     int margin, r;
     node_t *ln, *rn, *v;
@@ -1159,7 +1159,7 @@ static void contain_nodes(graph_t * g)
  * set g->drawing->size to a reasonable default.
  * returns a boolean to indicate if drawing is to
  * be scaled and filled */
-static bool idealsize(graph_t * g, double minallowed)
+bool idealsize(graph_t * g, double minallowed)
 {
     double xf, yf, f, R;
     pointf b, relpage, margin;

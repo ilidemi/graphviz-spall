@@ -14,7 +14,7 @@
 #include <dotgen/dot.h>
 #include <stdbool.h>
 
-static node_t*
+node_t*
 label_vnode(graph_t * g, edge_t * orig)
 {
     node_t *v;
@@ -36,7 +36,7 @@ label_vnode(graph_t * g, edge_t * orig)
     return v;
 }
 
-static void 
+void 
 incr_width(graph_t * g, node_t * v)
 {
     int width = GD_nodesep(g) / 2;
@@ -44,14 +44,14 @@ incr_width(graph_t * g, node_t * v)
     ND_rw(v) += width;
 }
 
-static node_t *plain_vnode(graph_t *g) {
+node_t *plain_vnode(graph_t *g) {
     node_t *v;
     v = virtual_node(g);
     incr_width(g, v);
     return v;
 }
 
-static node_t *leader_of(node_t * v) {
+node_t *leader_of(node_t * v) {
     graph_t *clust;
     node_t *rv;
 
@@ -67,7 +67,7 @@ static node_t *leader_of(node_t * v) {
 /* make_chain:
  * Create chain of dummy nodes for edge orig.
  */
-static void 
+void 
 make_chain(graph_t * g, node_t * from, node_t * to, edge_t * orig)
 {
     int r, label_rank;
@@ -96,7 +96,7 @@ make_chain(graph_t * g, node_t * from, node_t * to, edge_t * orig)
     assert(ED_to_virt(orig) != NULL);
 }
 
-static void 
+void 
 interclrep(graph_t * g, edge_t * e)
 {
     node_t *t, *h;
@@ -126,7 +126,7 @@ interclrep(graph_t * g, edge_t * e)
     /* else ignore intra-cluster edges at this point */
 }
 
-static bool is_cluster_edge(edge_t *e) {
+bool is_cluster_edge(edge_t *e) {
   return ND_ranktype(agtail(e)) == CLUSTER || ND_ranktype(aghead(e)) == CLUSTER;
 }
 

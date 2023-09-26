@@ -52,7 +52,7 @@ static int nNodeGroups = 0;
  * computeNodeGroups function does the groupings of nodes.   
  * The grouping is based on the union-find data structure.
  */
-static void computeNodeGroups(graph_t * g)
+void computeNodeGroups(graph_t * g)
 {
     node_t *n;
 
@@ -167,7 +167,7 @@ static int nLayers = 0;
 
 /* computeLayerWidths:
  */
-static void computeLayerWidths(graph_t * g)
+void computeLayerWidths(graph_t * g)
 {
     int i;
     node_t *v;
@@ -250,7 +250,7 @@ static void computeLayerWidths(graph_t * g)
  * Comparison function to be used in qsort.
  * For sorting the layers by nonincreasing width
  */
-static int compFunction(const void *a, const void *b)
+int compFunction(const void *a, const void *b)
 {
     const int *ind1 = a;
     const int *ind2 = b;
@@ -265,7 +265,7 @@ static int compFunction(const void *a, const void *b)
  * qsort should be replaced by insertion sort for better performance.
  * (layers are "almost" sorted during iterations)
  */
-static void sortLayers(graph_t * g)
+void sortLayers(graph_t * g)
 {
     qsort(sortedLayerIndex, agnnodes(g), sizeof(int), compFunction);
 }
@@ -273,7 +273,7 @@ static void sortLayers(graph_t * g)
 /* getOutDegree:
  * Return the sum of out degrees of the nodes in a node group.
  */
-static int getOutDegree(nodeGroup_t * ng)
+int getOutDegree(nodeGroup_t * ng)
 {
     int i, cnt = 0;
     for (i = 0; i < ng->nNodes; i++) {
@@ -294,7 +294,7 @@ static int getOutDegree(nodeGroup_t * ng)
  * Comparison function to be used in qsort.
  * For sorting the node groups by their out degrees (nondecreasing)
  */
-static int compFunction2(const void *a, const void *b)
+int compFunction2(const void *a, const void *b)
 {
     nodeGroup_t **ind1 = (nodeGroup_t **) a, **ind2 = (nodeGroup_t **) b;
 
@@ -311,7 +311,7 @@ static int compFunction2(const void *a, const void *b)
  * by node widths and heights.
  * FFDH procedure
  */
-static void reduceMaxWidth2(graph_t * g)
+void reduceMaxWidth2(graph_t * g)
 {
     int i;
     int maxLayerIndex = 0;
@@ -426,7 +426,7 @@ static void reduceMaxWidth2(graph_t * g)
 /* applyPacking2:
  * The following is the packing heuristic for wide layout.
  */
-static void applyPacking2(graph_t * g)
+void applyPacking2(graph_t * g)
 {
     int i;
 
@@ -464,7 +464,7 @@ void initEdgeTypes(graph_t * g)
  * Width of the widest layer / Height 
  * (in ranking phase)
  */
-static double computeCombiAR(graph_t * g)
+double computeCombiAR(graph_t * g)
 {
     int i;
     double maxW = 0;
@@ -495,7 +495,7 @@ static double computeCombiAR(graph_t * g)
  * found to be empty.
  * This function removes the empty layers.
  */
-static void zapLayers(void)
+void zapLayers(void)
 {
     int i, j;
     int start = 0;

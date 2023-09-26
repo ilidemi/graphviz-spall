@@ -13,7 +13,7 @@
 #include	<stdbool.h>
 #include	<stddef.h>
 
-static node_t *make_vn_slot(graph_t * g, int r, int pos)
+node_t *make_vn_slot(graph_t * g, int r, int pos)
 {
     int i;
     node_t **v, *n;
@@ -36,7 +36,7 @@ static node_t *make_vn_slot(graph_t * g, int r, int pos)
 #define		SLB		2	/* soft left bound */
 #define		SRB		3	/* soft right bound */
 
-static void findlr(node_t * u, node_t * v, int *lp, int *rp)
+void findlr(node_t * u, node_t * v, int *lp, int *rp)
 {
     int l, r;
     l = ND_order(u);
@@ -50,7 +50,7 @@ static void findlr(node_t * u, node_t * v, int *lp, int *rp)
     *rp = r;
 }
 
-static void setbounds(node_t * v, int *bounds, int lpos, int rpos)
+void setbounds(node_t * v, int *bounds, int lpos, int rpos)
 {
     int i, l, r, ord;
     edge_t *f;
@@ -96,7 +96,7 @@ static void setbounds(node_t * v, int *bounds, int lpos, int rpos)
     }
 }
 
-static int flat_limits(graph_t * g, edge_t * e)
+int flat_limits(graph_t * g, edge_t * e)
 {
     int lnode, rnode, r, bounds[4], lpos, rpos, pos;
     node_t **rank;
@@ -130,7 +130,7 @@ static int flat_limits(graph_t * g, edge_t * e)
  * This node is characterized by being virtual and having a non-NULL
  * ND_alg pointing to e.
  */
-static void 
+void 
 flat_node(edge_t * e)
 {
     int r, place;
@@ -181,7 +181,7 @@ flat_node(edge_t * e)
     ND_alg(vn) = e;
 }
 
-static void abomination(graph_t * g)
+void abomination(graph_t * g)
 {
     int r;
     rank_t *rptr;
@@ -206,7 +206,7 @@ static void abomination(graph_t * g)
  * If so, set adjacent bit on all related edges.
  * Assume e is flat.
  */
-static void
+void
 checkFlatAdjacent (edge_t* e)
 {
     node_t* tn = agtail(e);
